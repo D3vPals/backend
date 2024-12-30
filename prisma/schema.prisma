@@ -9,14 +9,14 @@ datasource db {
 }
 
 model Applicant {
-  id          String            @id @db.Char(36)
-  userId      String?           @db.Char(36)
-  projectId   String?           @db.Char(36)
+  id          Int               @id @default(autoincrement())
+  userId      Int?         
+  projectId   Int?         
   message     String?           @db.Text
   email       String?           @db.Char(1)
   phoneNumber String?           @db.Char(1)
   career      String?           @db.Text
-  status      Applicant_status? @default(dbgenerated("대기"))
+  status      Applicant_status? @default(WAITING)
   createdAt   DateTime?         @default(now()) @db.Timestamp(0)
   updatedAt   DateTime?         @default(now()) @db.Timestamp(0)
   User        User?             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Applicant_ibfk_1")
@@ -27,7 +27,7 @@ model Applicant {
 }
 
 model Authenticode {
-  id        String   @id @db.Char(36)
+  id        Int      @id @default(autoincrement())
   userEmail String   @db.VarChar(255)
   code      String   @db.VarChar(20)
   expiresAt DateTime @db.Timestamp(0)
@@ -47,7 +47,7 @@ model Method {
 
 model Notification {
   id        String    @id @db.Char(36)
-  userId    String?   @db.Char(36)
+  userId    Int
   content   String    @db.Text
   createdAt DateTime? @default(now()) @db.Timestamp(0)
   User      User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Notification_ibfk_1")
@@ -56,22 +56,22 @@ model Notification {
 }
 
 model PositionTag {
-  id         String    @id @db.Char(36)
+  id         Int       @id @default(autoincrement())
   name       String    @unique(map: "name") @db.VarChar(255)
-  created_at DateTime? @default(now()) @db.Timestamp(0)
+  createdAt DateTime? @default(now()) @db.Timestamp(0)
   Project    Project[]
 }
 
 model Project {
-  id              String            @id @db.Char(36)
+  id              Int               @id @default(autoincrement())
   title           String            @db.VarChar(255)
   description     String            @db.Text
   totalMember     Int?
   startDate       DateTime?         @db.Date
-  positionId      String?           @db.Char(36)
+  positionId      Int?
   estimatedPeriod String?           @db.VarChar(50)
   methodId        Int?
-  authorId        String?           @db.Char(36)
+  authorId        Int?   
   views           Int?              @default(0)
   isBeginner      Boolean?
   isDone          Boolean?
@@ -89,56 +89,43 @@ model Project {
 }
 
 model ProjectSkillTag {
-  project_id   String   @db.Char(36)
-  skill_tag_id String   @db.Char(36)
-  Project      Project  @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_1")
-  SkillTag     SkillTag @relation(fields: [skill_tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_2")
+  projectId    Int 
+  skillTagId   Int    
+  Project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_1")
+  SkillTag     SkillTag @relation(fields: [skillTagId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_2")
 
-  @@id([project_id, skill_tag_id])
-  @@index([skill_tag_id], map: "skill_tag_id")
+  @@id([projectId, skillTagId])
+  @@index([skillTagId], map: "skillTagId")
 }
 
 model SkillTag {
-  id              String            @id @db.Char(36)
+  id              Int               @id @default(autoincrement())
   name            String            @unique(map: "name") @db.VarChar(255)
-  created_at      DateTime?         @default(now()) @db.Timestamp(0)
+  img             String?           @db.Text
+  createdAt       DateTime?         @default(now()) @db.Timestamp(0)
   ProjectSkillTag ProjectSkillTag[]
   UserSkillTag    UserSkillTag[]
 }
 
-model Upload {
-  id        String    @id @db.Char(36)
-  userId    String?   @db.Char(36)
-  fileName  String    @db.VarChar(255)
-  fileUrl   String    @db.Text
-  fileKey   String    @db.VarChar(255)
-  fileType  String?   @db.VarChar(50)
-  fileSize  Int?
-  createdAt DateTime? @default(now()) @db.Timestamp(0)
-  User      User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Upload_ibfk_1")
-
-  @@index([userId], map: "userId")
-}
-
 model User {
-  id           String         @id @db.Char(36)
+  id           Int            @id @default(autoincrement())
   nickname     String         @unique(map: "nickname") @db.VarChar(255)
   email        String         @unique(map: "email") @db.VarChar(255)
   password     String         @db.VarChar(255)
   bio          String?        @db.Text
+  profileImg   String?        @db.Text
   createdAt    DateTime?      @default(now()) @db.Timestamp(0)
   updatedAt    DateTime?      @default(now()) @db.Timestamp(0)
   Applicant    Applicant[]
   Authenticode Authenticode[]
   Notification Notification[]
   Project      Project[]
-  Upload       Upload[]
   UserSkillTag UserSkillTag[]
 }
 
 model UserSkillTag {
-  userId           String                         @db.Char(36)
-  skillTagId       String                         @db.Char(36)
+  userId           Int
+  skillTagId       Int
   proficiencyLevel UserSkillTag_proficiencyLevel? @default(Beginner)
   createdAt        DateTime?                      @default(now()) @db.Timestamp(0)
   User             User                           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "UserSkillTag_ibfk_1")
