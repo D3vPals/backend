@@ -11,6 +11,7 @@ import { SkillTagModule } from './modules/skill-tag/skill-tag.module';
 import { PositionTagModule } from './modules/position-tag/position-tag.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
+import { MethodModule } from './modules/method/method.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
     PositionTagModule,
     UploadModule,
     PrismaModule,
+    MethodModule,
   ],
   controllers: [AppController],
   providers: [AppService],
