@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class PositionTagService {
+export class MethodService {
   constructor(private prismaService: PrismaService) {}
 
-  async fetchManyPositionTag() {
-    return await this.prismaService.positionTag.findMany();
+  async fetchManyMethod() {
+    return await this.prismaService.method.findMany();
   }
 }
