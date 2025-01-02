@@ -58,6 +58,7 @@ export class ProjectService {
       where.isBeginner = dto.isBeginner;
     }
 
+    // user 비밀번호 제외 항목만, 포지션, 진행 방식, 스킬 정보도 같이 내려주기
     const projects = await this.prismaService.project.findMany({
       skip: skipAmount,
       take: PAGE_SIZE,
