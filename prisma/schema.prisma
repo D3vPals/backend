@@ -63,6 +63,8 @@ model PositionTag {
 
 model Project {
   id              Int               @id @default(autoincrement())
+  recruitmentStartDate DateTime?    @db.Date
+  recruitmentEndDate DateTime?      @db.Date
   title           String            @db.VarChar(255)
   description     String            @db.Text
   totalMember     Int?
