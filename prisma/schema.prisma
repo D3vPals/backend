@@ -40,7 +40,6 @@ model Authenticode {
 model Method {
   id          Int       @id @default(autoincrement())
   name        String    @unique(map: "name") @db.VarChar(50)
-  description String?   @db.Text
   createdAt   DateTime? @default(now()) @db.Timestamp(0)
   Project     Project[]
 }
