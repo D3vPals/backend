@@ -18,7 +18,7 @@ export class AuthenticodeController {
   })
   @ApiResponse({
     status: 201,
-    description: '메일이 발송되었습니다.',
+    description: '인증 코드가 이메일로 전송되었습니다.',
   })
   @ApiResponse({
     status: 400,
