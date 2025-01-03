@@ -40,7 +40,7 @@ export class AuthController {
     schema: {
       example: {
         statusCode: 400,
-        message: ['이메일을 입력해주세요.', '비밀번호는 8자 이상 입력해주세요.'],
+        message: ['이메일을 입력해주세요.', '비밀번호는 8자 이상 20자 이하로 입력해주세요.'],
         error: 'Bad Request',
       },
     },
