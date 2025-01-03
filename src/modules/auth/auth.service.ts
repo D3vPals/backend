@@ -143,13 +143,13 @@ export class AuthService {
     
       // 2. 비밀번호 검증
       const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-          throw new BadRequestException({
-            success: false,
-            message: '비밀번호가 틀렸습니다.',
-            data: null,
-          });
-        }
+      if (!isPasswordValid) {
+        throw new BadRequestException({
+          success: false,
+          message: '비밀번호가 틀렸습니다.',
+          data: null,
+        });
+      }
     
       // 3. 액세스 토큰 생성
       const accessToken = this.jwtService.sign(
@@ -157,29 +157,27 @@ export class AuthService {
         { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1h' },
       );
     
-      // 4. 리프레시 토큰 생성
+      // 4. 리프레시 토큰 생성 (해싱하지 않고 원본 그대로 저장)
       const rawRefreshToken = this.jwtService.sign(
         { sub: user.id },
         { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
       );
     
-      // 5. 리프레시 토큰 해싱 후 세션 저장
-      const hashedRefreshToken = await bcrypt.hash(rawRefreshToken, 10);
-    
-        await this.prisma.session.upsert({
-          where: { userId: user.id }, // userId를 고유 필드로 사용
-          create: {
-            userId: user.id,
-            accessToken,
-            refreshToken: hashedRefreshToken,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7일 후 만료
-          },
-          update: {
-            accessToken,
-            refreshToken: hashedRefreshToken,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7일 후 갱신
-          },
-        });
+      // 5. 리프레시 토큰을 해싱하지 않고 원본 그대로 저장
+      await this.prisma.session.upsert({
+        where: { userId: user.id }, // userId를 고유 필드로 사용
+        create: {
+          userId: user.id,
+          accessToken,
+          refreshToken: rawRefreshToken,  // 해싱하지 않고 원본 그대로 저장
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7일 후 만료
+        },
+        update: {
+          accessToken,
+          refreshToken: rawRefreshToken,  // 해싱하지 않고 원본 그대로 저장
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7일 후 갱신
+        },
+      });
     
       // 6. 성공 응답 반환
       return {
@@ -187,10 +185,10 @@ export class AuthService {
         message: '로그인 되었습니다',
         data: {
           accessToken,
-          refreshToken: rawRefreshToken,
+          refreshToken: rawRefreshToken,  // 원본 리프레시 토큰을 반환
         },
       };
-    }
+    }    
 
     // 로그아웃
     async logout(userId: number) {
@@ -204,34 +202,45 @@ export class AuthService {
 
     // 리프레쉬 토큰 갱신
     async refreshTokens(refreshToken: string) {
-        try {
-          const payload = this.jwtService.verify(refreshToken, {
-            secret: process.env.JWT_REFRESH_SECRET,
+      try {
+        // 리프레시 토큰 검증
+        const payload = this.jwtService.verify(refreshToken, {
+          secret: process.env.JWT_REFRESH_SECRET,
         });
-      
+    
         // Session 테이블에서 리프레시 토큰 검증
-        const session = await this.prisma.session.findUnique({ where: { userId: payload.sub } });
-          if (!session || !(await bcrypt.compare(refreshToken, session.refreshToken))) {
-            throw new UnauthorizedException('Invalid refresh token');
+        const session = await this.prisma.session.findUnique({
+          where: { userId: payload.sub },
+        });
+    
+        // 세션이 없거나 리프레시 토큰이 일치하지 않으면 오류 발생
+        if (!session || session.refreshToken !== refreshToken) {
+          throw new UnauthorizedException('Invalid refresh token');
         }
-      
+    
+        // 새로운 액세스 토큰 생성
         const newAccessToken = this.jwtService.sign(
           { sub: payload.sub, email: payload.email },
-          { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '15m' },
+          { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1h' },
         );
-      
+    
+        // 새로운 리프레시 토큰 생성
         const newRefreshToken = this.jwtService.sign(
           { sub: payload.sub },
           { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
         );
-      
-        // 새 리프레시 토큰 저장
-        const hashedNewRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+    
+        // 세션 갱신: 새로운 리프레시 토큰을 DB에 저장
         await this.prisma.session.update({
           where: { userId: payload.sub },
-          data: { refreshToken: hashedNewRefreshToken, expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+          data: {
+            accessToken: newAccessToken,  // 새로운 액세스 토큰 저장
+            refreshToken: newRefreshToken,  // 리프레시 토큰을 해싱하지 않고 원본 그대로 저장
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),  // 7일 후 만료
+          },
         });
-      
+    
+        // 새로운 토큰 반환
         return {
           accessToken: newAccessToken,
           refreshToken: newRefreshToken,
@@ -239,5 +248,5 @@ export class AuthService {
       } catch (error) {
         throw new UnauthorizedException('Invalid refresh token');
       }
-    }      
+    }
 }
