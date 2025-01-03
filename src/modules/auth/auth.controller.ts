@@ -29,7 +29,7 @@ export class AuthController {
         user: {
           id: 1,
           email: 'devpals@mail.com',
-          nickname: '김데브',
+          nickname: '김개발',
         },
       },
     },
