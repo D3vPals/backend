@@ -22,7 +22,7 @@ export class AuthenticodeController {
   })
   @ApiResponse({
     status: 400,
-    description: '잘못된 요청입니다. 이메일 형식이 유효하지 않습니다.',
+    description: '유효한 이메일을 입력해주세요.',
   })
   @ApiResponse({
     status: 500,
@@ -45,7 +45,7 @@ export class AuthenticodeController {
   })
   @ApiResponse({
     status: 400,
-    description: '잘못된 요청입니다. 이메일 또는 인증 코드가 유효하지 않습니다.',
+    description: '유효한 이메일을 입력해주세요.',
   })
   @ApiResponse({
     status: 401,
