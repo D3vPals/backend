@@ -28,13 +28,12 @@ model Applicant {
 
 model Authenticode {
   id        Int      @id @default(autoincrement())
-  userEmail String   @db.VarChar(255)
+  userEmail String   @db.VarChar(255) // 외래 키 관계 제거
   code      String   @db.VarChar(20)
   expiresAt DateTime @db.Timestamp(0)
   isUsed    Boolean? @default(false)
-  User      User     @relation(fields: [userEmail], references: [email], onDelete: Cascade, onUpdate: NoAction, map: "Authenticode_ibfk_1")
 
-  @@index([userEmail], map: "userEmail")
+  @@index([userEmail]) // 외래 키 대신 단순 인덱스
 }
 
 model Method {
@@ -110,13 +109,12 @@ model User {
   id           Int            @id @default(autoincrement())
   nickname     String         @unique(map: "nickname") @db.VarChar(255)
   email        String         @unique(map: "email") @db.VarChar(255)
-  password     String         @db.VarChar(255)
+  password     String         @db.VarChar(255) 
   bio          String?        @db.Text
   profileImg   String?        @db.Text
   createdAt    DateTime?      @default(now()) @db.Timestamp(0)
   updatedAt    DateTime?      @default(now()) @db.Timestamp(0)
   Applicant    Applicant[]
-  Authenticode Authenticode[]
   Notification Notification[]
   Project      Project[]
   UserSkillTag UserSkillTag[]
