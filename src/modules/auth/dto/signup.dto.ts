@@ -11,15 +11,6 @@ export class SignUpDto {
   email: string;
 
   @ApiProperty({
-    example: '123456',
-    description: '이메일 인증 코드',
-    required: true,
-  })
-  @IsNotEmpty({ message: '인증 코드를 입력해주세요.' })
-  @IsString()
-  code: string;
-
-  @ApiProperty({
     example: 'test123!',
     description: '사용자의 비밀번호',
     required: true,
