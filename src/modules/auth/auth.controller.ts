@@ -1,11 +1,27 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, UsePipes,
-    ValidationPipe, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+  Req,
+} from '@nestjs/common';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
-import { ApiOperation, ApiTags, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto'
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { AuthService } from './auth.service';
+import { CurrentUser } from 'src/decorators/curretUser.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -17,7 +33,8 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: '회원가입',
-    description: '사용자의 이메일, 닉네임, 비밀번호, 인증 코드를 통해 회원가입을 처리합니다.',
+    description:
+      '사용자의 이메일, 닉네임, 비밀번호, 인증 코드를 통해 회원가입을 처리합니다.',
   })
   @ApiResponse({
     status: 201,
@@ -40,7 +57,10 @@ export class AuthController {
     schema: {
       example: {
         statusCode: 400,
-        message: ['이메일을 입력해주세요.', '비밀번호는 8자 이상 20자 이하로 입력해주세요.'],
+        message: [
+          '이메일을 입력해주세요.',
+          '비밀번호는 8자 이상 20자 이하로 입력해주세요.',
+        ],
         error: 'Bad Request',
       },
     },
@@ -64,7 +84,10 @@ export class AuthController {
   // POST: 로그인
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: '로그인', description: '이메일과 비밀번호로 로그인하여 JWT를 반환합니다.' })
+  @ApiOperation({
+    summary: '로그인',
+    description: '이메일과 비밀번호로 로그인하여 JWT를 반환합니다.',
+  })
   @ApiResponse({
     status: 200,
     description: '로그인 성공',
@@ -152,7 +175,10 @@ export class AuthController {
 
   // POST: 로그아웃
   @Post('logout')
-  @ApiOperation({ summary: '로그아웃', description: '로그아웃을 수행하고 세션을 무효화합니다.' })
+  @ApiOperation({
+    summary: '로그아웃',
+    description: '로그아웃을 수행하고 세션을 무효화합니다.',
+  })
   @ApiBearerAuth('JWT')
   @ApiResponse({
     status: 201,
@@ -175,9 +201,9 @@ export class AuthController {
     },
   })
   @UseGuards(JwtAuthGuard)
-  async postLogout(@Req() req) {
-    const userId = req.user.userId;
+  async postLogout(@CurrentUser() userId: number) {
     await this.authService.logout(userId);
+
     return { message: '로그아웃에 성공했습니다' };
   }
 
@@ -186,7 +212,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '토큰 갱신',
-    description: '리프레시 토큰을 사용해 새로운 액세스 토큰과 리프레시 토큰을 발급받습니다.',
+    description:
+      '리프레시 토큰을 사용해 새로운 액세스 토큰과 리프레시 토큰을 발급받습니다.',
   })
   @ApiBody({
     description: '리프레시 토큰 요청 본문',
@@ -224,4 +251,3 @@ export class AuthController {
     return this.authService.refreshTokens(refreshToken);
   }
 }
-
