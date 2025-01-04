@@ -13,4 +13,11 @@ export class UserService {
     // 닉네임이 이미 존재하면 false 반환
     return !existingUser;
   }
+
+  async checkEmailAvailability(email: string): Promise<boolean> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    return user ? false : true; // 이메일이 이미 존재하면 false 반환
+  }
 }
