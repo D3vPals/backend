@@ -34,7 +34,7 @@ export class AuthController {
   @ApiOperation({
     summary: '회원가입',
     description:
-      '사용자의 이메일, 닉네임, 비밀번호, 인증 코드를 통해 회원가입을 처리합니다.',
+      '사용자의 이메일, 닉네임, 비밀번호를 통해 회원가입을 처리합니다.',
   })
   @ApiResponse({
     status: 201,
@@ -62,17 +62,6 @@ export class AuthController {
           '비밀번호는 8자 이상 20자 이하로 입력해주세요.',
         ],
         error: 'Bad Request',
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: '인증 코드 오류',
-    schema: {
-      example: {
-        statusCode: 401,
-        message: '유효하지 않거나 이미 사용된 인증 코드입니다.',
-        error: 'Unauthorized',
       },
     },
   })
@@ -169,8 +158,8 @@ export class AuthController {
       },
     },
   })
-  async postResetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(resetPasswordDto);
+  async postResetPassword(@CurrentUser() userId: number, @Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPassword(userId, resetPasswordDto);
   }
 
   // POST: 로그아웃
