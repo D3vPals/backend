@@ -5,13 +5,12 @@ import * as bcrypt from 'bcrypt';
 import { SignUpDto } from './dto/signup.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { LoginDto } from './dto/login.dto';
-import { AuthenticodeService } from '../authenticode/authenticode.service';
+
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService, 
-    private readonly authenticodeService: AuthenticodeService,
     private readonly jwtService: JwtService,
   ) {}
 
