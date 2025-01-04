@@ -28,12 +28,12 @@ model Applicant {
 
 model Authenticode {
   id        Int      @id @default(autoincrement())
-  userEmail String   @db.VarChar(255) // 외래 키 관계 제거
+  userEmail String   @db.VarChar(255)
   code      String   @db.VarChar(20)
   expiresAt DateTime @db.Timestamp(0)
   isUsed    Boolean? @default(false)
 
-  @@index([userEmail]) // 외래 키 대신 단순 인덱스
+  @@index([userEmail])  // 외래 키 대신 단순 인덱스
 }
 
 model Method {
@@ -109,7 +109,7 @@ model User {
   id           Int            @id @default(autoincrement())
   nickname     String         @unique(map: "nickname") @db.VarChar(255)
   email        String         @unique(map: "email") @db.VarChar(255)
-  password     String         @db.VarChar(255) 
+  password     String         @db.VarChar(255)
   bio          String?        @db.Text
   profileImg   String?        @db.Text
   createdAt    DateTime?      @default(now()) @db.Timestamp(0)
@@ -117,8 +117,8 @@ model User {
   Applicant    Applicant[]
   Notification Notification[]
   Project      Project[]
+  sessions     Session[]
   UserSkillTag UserSkillTag[]
-  sessions     Session[] 
 }
 
 model UserSkillTag {
@@ -145,15 +145,14 @@ model ProjectPositionTag {
 
 model Session {
   id           Int      @id @default(autoincrement())
-  userId       Int      // User와 연결
-  accessToken  String   // 액세스 토큰
-  refreshToken String   // 해싱된 리프레시 토큰
-  expiresAt    DateTime // 리프레시 토큰 만료 시간
+  userId       Int      @unique
+  accessToken  String     // 액세스 토큰
+  refreshToken String     // 해싱된 리프레시 토큰
+  expiresAt    DateTime   // 리프레시 토큰 만료 시간
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
-
 
 enum UserSkillTag_proficiencyLevel {
   Beginner
