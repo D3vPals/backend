@@ -4,7 +4,7 @@ import { AuthenticodeService } from './authenticode.service';
 import { SendEmailCodeDto } from './dto/send-email-code.dto';
 import { VerifyEmailCodeDto } from './dto/verify-email-code.dto';
 
-@ApiTags('Authenticode')
+@ApiTags('authenticode')
 @Controller('authenticode')
 export class AuthenticodeController {
   constructor(private readonly authenticodeService: AuthenticodeService) {}
