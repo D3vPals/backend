@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service'
 import * as bcrypt from 'bcrypt';
 import { SignUpDto } from './dto/signup.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -15,61 +16,23 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly userService: UserService,
   ) {}
 
   // 회원가입 로직
   async signUp(signUpDto: SignUpDto) {
-    const { email, code, password, nickname } = signUpDto;
-    // 1. 인증 코드 검증
-    const authCode = await this.prisma.authenticode.findFirst({
-      where: { userEmail: email, code },
-    });
+    const { email, password, nickname } = signUpDto;
 
-    // 인증 코드가 존재하지 않거나 만료된 경우
-    if (!authCode) {
-      throw new BadRequestException('유효하지 않은 인증 코드입니다.');
-    }
-
-    // 인증 코드가 만료된 경우
-    if (authCode.expiresAt < new Date()) {
-      throw new BadRequestException('인증 코드가 만료되었습니다.');
-    }
-
-    // 인증 코드 상태가 이미 사용되었으면 이를 다시 사용 가능하게 설정
-    // 회원가입 도중에 인증 코드가 사용된 상태일 경우 isUsed를 false로 변경
-    if (authCode.isUsed) {
-      await this.prisma.authenticode.update({
-        where: { id: authCode.id },
-        data: { isUsed: false }, // 재사용을 허용하기 위해 isUsed를 다시 false로 설정
-      });
-    }
-
-    // 인증 코드 상태를 사용 완료로 업데이트
-    await this.prisma.authenticode.update({
-      where: { id: authCode.id },
-      data: { isUsed: true }, // 최종적으로 사용 완료 상태로 업데이트
-    });
-
-    // 2. 이메일 중복 체크
-    const emailExists = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    if (emailExists) {
+    // 이메일 중복 체크
+    const isEmailAvailable = await this.userService.checkEmailAvailability(email);
+    if (!isEmailAvailable) {
       throw new BadRequestException('이미 사용 중인 이메일입니다.');
     }
-
-    // 3. 닉네임 중복 체크
-    const nicknameExists = await this.prisma.user.findUnique({
-      where: { nickname },
-    });
-    if (nicknameExists) {
-      throw new BadRequestException('이미 사용 중인 닉네임입니다.');
-    }
-
-    // 4. 비밀번호 해싱
+  
+    // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 5. 유저 생성
+  
+    // 유저 생성
     const user = await this.prisma.user.create({
       data: {
         email,
@@ -77,8 +40,8 @@ export class AuthService {
         nickname,
       },
     });
-
-    // 6. 성공 메시지 반환
+  
+    // 성공 메시지 반환
     return {
       success: true,
       message: '회원가입이 완료되었습니다.',
@@ -91,8 +54,8 @@ export class AuthService {
   }
 
   // 비밀번호 재설정 로직
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    const { email, code, newPassword } = resetPasswordDto;
+  async resetPassword(userId: number, resetPasswordDto: ResetPasswordDto) {
+    const { email, code, newPassword } = resetPasswordDto; // email과 code를 dto에서 추출
 
     // 1. 인증 코드 검증
     const authCode = await this.prisma.authenticode.findFirst({
@@ -113,7 +76,7 @@ export class AuthService {
 
     // 3. 사용자 비밀번호 업데이트
     await this.prisma.user.update({
-      where: { email },
+      where: {  id: userId },
       data: { password: hashedPassword },
     });
 
