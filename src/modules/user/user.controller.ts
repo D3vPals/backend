@@ -34,8 +34,8 @@ export class UserController {
       },
     },
   })
-  async postNicknameCheck(@Body() checkNicknameDto: CheckNicknameDto) {
-    const isAvailable = await this.userService.checkNicknameAvailability(checkNicknameDto.nickname);
+  async postNicknameCheck(@Body() { nickname }: CheckNicknameDto) {
+    const isAvailable = await this.userService.checkNicknameAvailability(nickname);
 
     if (!isAvailable) {
       throw new BadRequestException('이미 사용 중인 닉네임입니다.');
