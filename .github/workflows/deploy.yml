@@ -24,9 +24,6 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      - name: Build Project
-        run: npm run start:migrate:prod
-
       - name: Deploy to EC2
         env:
           HOST: ${{ secrets.EC2_HOST }}
@@ -45,7 +42,7 @@ jobs:
             git pull origin prod &&
             npm install &&
             npm run build &&
-            npm run start:migrate:prod &&
+            npx prisma migrate deploy &&
             pm2 restart all
           "
           rm -f private_key.pem
