@@ -135,10 +135,10 @@ export class AuthController {
       },
     },
   })
-  async postResetPassword(@Body() {email, newPassword}: ResetPasswordDto) {
-    return this.authService.resetPassword(email, newPassword);
+  async postResetPassword(@Body() body: ResetPasswordDto) {
+    return this.authService.resetPassword(body);
   }
-   
+
   // POST: 로그아웃
   @Post('logout')
   @ApiOperation({
