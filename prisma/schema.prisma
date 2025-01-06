@@ -33,7 +33,7 @@ model Authenticode {
   expiresAt DateTime @db.Timestamp(0)
   isUsed    Boolean? @default(false)
 
-  @@index([userEmail])  // 외래 키 대신 단순 인덱스
+  @@index([userEmail])
 }
 
 model Method {
@@ -64,18 +64,18 @@ model Project {
   id                   Int                  @id @default(autoincrement())
   title                String               @db.VarChar(255)
   description          String               @db.Text
-  totalMember          Int?
-  startDate            DateTime?            @db.Date
-  estimatedPeriod      String?              @db.VarChar(50)
+  totalMember          Int
+  startDate            DateTime             @db.Date
+  estimatedPeriod      String               @db.VarChar(50)
   methodId             Int?
   authorId             Int?
-  views                Int?                 @default(0)
-  isBeginner           Boolean?
-  isDone               Boolean?
-  createdAt            DateTime?            @default(now()) @db.Timestamp(0)
-  updatedAt            DateTime?            @default(now()) @db.Timestamp(0)
-  recruitmentEndDate   DateTime?            @db.Date
-  recruitmentStartDate DateTime?            @db.Date
+  views                Int                  @default(0)
+  isBeginner           Boolean              @default(false)
+  isDone               Boolean              @default(false)
+  recruitmentEndDate   DateTime             @db.Date
+  recruitmentStartDate DateTime             @db.Date
+  createdAt            DateTime             @default(now()) @db.Timestamp(0)
+  updatedAt            DateTime             @default(now()) @db.Timestamp(0)
   Applicant            Applicant[]
   User                 User?                @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_1")
   Method               Method?              @relation(fields: [methodId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_3")
@@ -145,10 +145,10 @@ model ProjectPositionTag {
 
 model Session {
   id           Int      @id @default(autoincrement())
-  userId       Int      @unique
-  accessToken  String     // 액세스 토큰
-  refreshToken String     // 해싱된 리프레시 토큰
-  expiresAt    DateTime   // 리프레시 토큰 만료 시간
+  userId       Int
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
