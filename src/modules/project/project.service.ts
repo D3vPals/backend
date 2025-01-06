@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
@@ -110,7 +110,12 @@ export class ProjectService {
   }
 
   async fetchProject({ id }: { id: number }) {
-    return await this.prismaService.project.findFirst({
+    await this.prismaService.project.update({
+      where: { id },
+      data: { views: { increment: 1 } },
+    });
+
+    const project = await this.prismaService.project.findFirst({
       where: { id },
       include: {
         User: {
@@ -133,5 +138,11 @@ export class ProjectService {
         },
       },
     });
+
+    if (!project) {
+      throw new NotFoundException('해당 공고는 존재하지 않습니다.');
+    }
+
+    return project;
   }
 }
