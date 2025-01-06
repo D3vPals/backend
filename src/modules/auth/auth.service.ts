@@ -54,50 +54,29 @@ export class AuthService {
   }
 
   // 비밀번호 재설정 로직
-  async resetPassword(userId: number, resetPasswordDto: ResetPasswordDto) {
-    const { email, code, newPassword } = resetPasswordDto; // email과 code를 dto에서 추출
+  async resetPassword(resetPasswordDto:ResetPasswordDto) {
+    const {email, newPassword} = resetPasswordDto;
 
-    // 1. 인증 코드 검증
-    const authCode = await this.prisma.authenticode.findFirst({
-      where: { userEmail: email, code, isUsed: false },
-    });
-
-    if (!authCode) {
-      throw new BadRequestException('유효하지 않은 인증 코드입니다.');
+    // 1. 이메일로 사용자 찾기 (userService에서 처리)
+    const user = await this.userService.findUserByEmail(email); // userService를 사용하여 이메일로 사용자 찾기
+    if (!user) {
+      throw new BadRequestException('등록되지 않은 이메일입니다.');
     }
-
-    // 인증 코드 만료 검사
-    if (authCode.expiresAt < new Date()) {
-      throw new BadRequestException('인증 코드가 만료되었습니다.');
-    }
-
-    // 2. 새로운 비밀번호 해싱
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // 3. 사용자 비밀번호 업데이트
-    await this.prisma.user.update({
-      where: {  id: userId },
-      data: { password: hashedPassword },
-    });
-
-    // 4. 인증 코드 사용 완료 처리
-    await this.prisma.authenticode.update({
-      where: { id: authCode.id },
-      data: { isUsed: true },
-    });
-
+  
+    // 2. 사용자 비밀번호 업데이트    
+    await this.userService.updatePasswordByEmail(email, newPassword);  
     return {
       success: true,
       message: '비밀번호가 성공적으로 재설정되었습니다.',
     };
   }
 
-  // 로그인
+  // 로그인 
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
     // 1. 사용자 확인
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.userService.findUserByEmail(email);
     if (!user) {
       throw new BadRequestException({
         success: false,
