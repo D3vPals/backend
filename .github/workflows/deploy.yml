@@ -37,6 +37,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST "
             export DATABASE_URL='${DATABASE_URL}' &&
             cd $APP_DIR &&
+            git stash &&
             git fetch origin &&
             git checkout prod &&
             git pull origin prod &&
