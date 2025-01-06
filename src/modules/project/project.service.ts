@@ -92,4 +92,20 @@ export class ProjectService {
 
     return { projects, total, currentPage, lastPage };
   }
+
+  // 진행중, 마감, 전체 공고 개수
+  async fetchProjectCount() {
+    // 전체 공고 개수
+    const totalProjectCount = await this.prismaService.project.count();
+    // 마감된 공고 개수
+    const endProjectCount = await this.prismaService.project.count({
+      where: { isDone: true },
+    });
+
+    return {
+      ongoingProjectCount: totalProjectCount - endProjectCount,
+      endProjectCount,
+      totalProjectCount,
+    };
+  }
 }

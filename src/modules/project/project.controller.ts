@@ -12,4 +12,9 @@ export class ProjectController {
   async getManyProject(@Query() query: GetManyProjectDTO) {
     return await this.projectService.fetchManyProject(query);
   }
+
+  @Get('count')
+  async getProjectCount() {
+    return await this.projectService.fetchProjectCount();
+  }
 }
