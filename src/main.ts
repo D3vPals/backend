@@ -9,7 +9,10 @@ config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  app.enableCors();
+  app.enableCors({
+    origin: ['http://localhost:3000'], // 로컬 React 개발 서버 허용(기본 포트 적용 추후 수정 필요!)
+    credentials: true, // 인증 정보(쿠키 등) 허용
+  });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(bodyParser.json());
 
