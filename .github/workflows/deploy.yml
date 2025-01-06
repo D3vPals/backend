@@ -30,10 +30,12 @@ jobs:
           USER: ${{ secrets.EC2_USER }}
           KEY: ${{ secrets.EC2_KEY }}
           APP_DIR: /var/www/backend
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           echo "${KEY}" > private_key.pem
           chmod 600 private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem $USER@$HOST "
+            export DATABASE_URL='${DATABASE_URL}' &&
             cd $APP_DIR &&
             git fetch origin &&
             git checkout prod &&
