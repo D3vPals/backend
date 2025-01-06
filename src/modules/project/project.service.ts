@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
@@ -25,7 +29,7 @@ export class ProjectService {
     // 스킬 태그 조건 추가
     if (dto.skillTag && dto.skillTag.length > 0) {
       where.ProjectSkillTag = {
-        some: {
+        every: {
           skillTagId: { in: dto.skillTag },
         },
       };
@@ -43,14 +47,8 @@ export class ProjectService {
     }
 
     // 진행 방식 조건 추가
-    if (dto.method) {
-      where.Method = {
-        some: {
-          Method: {
-            id: dto.method,
-          },
-        },
-      };
+    if (dto.methodId) {
+      where.methodId = dto.methodId;
     }
 
     // 새싹 가능 조건 추가
@@ -109,11 +107,20 @@ export class ProjectService {
     };
   }
 
-  async fetchProject({ id }: { id: number }) {
-    await this.prismaService.project.update({
+  async incrementViews(id: number) {
+    // views를 증가시킬 때만 호출
+    return this.prismaService.project.update({
       where: { id },
       data: { views: { increment: 1 } },
     });
+  }
+
+  async fetchProject({ id }: { id: number }) {
+    if (id === 0 || isNaN(id)) {
+      throw new BadRequestException(
+        'Invalid ID: ID must be a valid number and not 0.',
+      );
+    }
 
     const project = await this.prismaService.project.findFirst({
       where: { id },

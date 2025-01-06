@@ -32,6 +32,8 @@ export class ProjectController {
 
   @Get(':id')
   async getProject(@Param('id', ParseIntPipe) id: number) {
+    await this.projectService.incrementViews(id);
+
     return await this.projectService.fetchProject({ id });
   }
 
