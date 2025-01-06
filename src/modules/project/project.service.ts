@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
@@ -91,5 +91,58 @@ export class ProjectService {
     const lastPage = Math.ceil(total / PAGE_SIZE);
 
     return { projects, total, currentPage, lastPage };
+  }
+
+  // 진행중, 마감, 전체 공고 개수
+  async fetchProjectCount() {
+    // 전체 공고 개수
+    const totalProjectCount = await this.prismaService.project.count();
+    // 마감된 공고 개수
+    const endProjectCount = await this.prismaService.project.count({
+      where: { isDone: true },
+    });
+
+    return {
+      ongoingProjectCount: totalProjectCount - endProjectCount,
+      endProjectCount,
+      totalProjectCount,
+    };
+  }
+
+  async fetchProject({ id }: { id: number }) {
+    await this.prismaService.project.update({
+      where: { id },
+      data: { views: { increment: 1 } },
+    });
+
+    const project = await this.prismaService.project.findFirst({
+      where: { id },
+      include: {
+        User: {
+          select: {
+            id: true,
+            nickname: true,
+            email: true,
+            bio: true,
+            profileImg: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        ProjectSkillTag: {
+          include: { SkillTag: true },
+        },
+        Method: true,
+        ProjectPositionTag: {
+          include: { PositionTag: true },
+        },
+      },
+    });
+
+    if (!project) {
+      throw new NotFoundException('해당 공고는 존재하지 않습니다.');
+    }
+
+    return project;
   }
 }
