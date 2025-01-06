@@ -10,8 +10,8 @@ datasource db {
 
 model Applicant {
   id          Int               @id @default(autoincrement())
-  userId      Int?         
-  projectId   Int?         
+  userId      Int?
+  projectId   Int?
   message     String?           @db.Text
   email       String?           @db.Char(1)
   phoneNumber String?           @db.Char(1)
@@ -32,17 +32,15 @@ model Authenticode {
   code      String   @db.VarChar(20)
   expiresAt DateTime @db.Timestamp(0)
   isUsed    Boolean? @default(false)
-  User      User     @relation(fields: [userEmail], references: [email], onDelete: Cascade, onUpdate: NoAction, map: "Authenticode_ibfk_1")
 
-  @@index([userEmail], map: "userEmail")
+  @@index([userEmail])
 }
 
 model Method {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique(map: "name") @db.VarChar(50)
-  description String?   @db.Text
-  createdAt   DateTime? @default(now()) @db.Timestamp(0)
-  Project     Project[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique(map: "name") @db.VarChar(50)
+  createdAt DateTime? @default(now()) @db.Timestamp(0)
+  Project   Project[]
 }
 
 model Notification {
@@ -50,49 +48,49 @@ model Notification {
   userId    Int
   content   String    @db.Text
   createdAt DateTime? @default(now()) @db.Timestamp(0)
-  User      User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Notification_ibfk_1")
+  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Notification_ibfk_1")
 
   @@index([userId], map: "userId")
 }
 
 model PositionTag {
-  id         Int       @id @default(autoincrement())
-  name       String    @unique(map: "name") @db.VarChar(255)
-  createdAt DateTime? @default(now()) @db.Timestamp(0)
-  Project    Project[]
+  id                 Int                  @id @default(autoincrement())
+  name               String               @unique(map: "name") @db.VarChar(255)
+  createdAt          DateTime?            @default(now()) @db.Timestamp(0)
+  ProjectPositionTag ProjectPositionTag[]
 }
 
 model Project {
-  id              Int               @id @default(autoincrement())
-  title           String            @db.VarChar(255)
-  description     String            @db.Text
-  totalMember     Int?
-  startDate       DateTime?         @db.Date
-  positionId      Int?
-  estimatedPeriod String?           @db.VarChar(50)
-  methodId        Int?
-  authorId        Int?   
-  views           Int?              @default(0)
-  isBeginner      Boolean?
-  isDone          Boolean?
-  createdAt       DateTime?         @default(now()) @db.Timestamp(0)
-  updatedAt       DateTime?         @default(now()) @db.Timestamp(0)
-  Applicant       Applicant[]
-  User            User?             @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_1")
-  PositionTag     PositionTag?      @relation(fields: [positionId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_2")
-  Method          Method?           @relation(fields: [methodId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_3")
-  ProjectSkillTag ProjectSkillTag[]
+  id                   Int                  @id @default(autoincrement())
+  title                String               @db.VarChar(255)
+  description          String               @db.Text
+  totalMember          Int
+  startDate            DateTime             @db.Date
+  estimatedPeriod      String               @db.VarChar(50)
+  methodId             Int?
+  authorId             Int?
+  views                Int                  @default(0)
+  isBeginner           Boolean              @default(false)
+  isDone               Boolean              @default(false)
+  recruitmentEndDate   DateTime             @db.Date
+  recruitmentStartDate DateTime             @db.Date
+  createdAt            DateTime             @default(now()) @db.Timestamp(0)
+  updatedAt            DateTime             @default(now()) @db.Timestamp(0)
+  Applicant            Applicant[]
+  User                 User?                @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_1")
+  Method               Method?              @relation(fields: [methodId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_3")
+  ProjectPositionTag   ProjectPositionTag[]
+  ProjectSkillTag      ProjectSkillTag[]
 
   @@index([authorId], map: "authorId")
   @@index([methodId], map: "methodId")
-  @@index([positionId], map: "positionId")
 }
 
 model ProjectSkillTag {
-  projectId    Int 
-  skillTagId   Int    
-  Project      Project  @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_1")
-  SkillTag     SkillTag @relation(fields: [skillTagId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_2")
+  projectId  Int
+  skillTagId Int
+  Project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_1")
+  SkillTag   SkillTag @relation(fields: [skillTagId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectSkillTag_ibfk_2")
 
   @@id([projectId, skillTagId])
   @@index([skillTagId], map: "skillTagId")
@@ -117,9 +115,9 @@ model User {
   createdAt    DateTime?      @default(now()) @db.Timestamp(0)
   updatedAt    DateTime?      @default(now()) @db.Timestamp(0)
   Applicant    Applicant[]
-  Authenticode Authenticode[]
   Notification Notification[]
   Project      Project[]
+  sessions     Session[]
   UserSkillTag UserSkillTag[]
 }
 
@@ -135,6 +133,27 @@ model UserSkillTag {
   @@index([skillTagId], map: "skillTagId")
 }
 
+model ProjectPositionTag {
+  projectId     Int
+  positionTagId Int
+  Project       Project     @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectPositionTag_ibfk_1")
+  PositionTag   PositionTag @relation(fields: [positionTagId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "ProjectPositionTag_ibfk_2")
+
+  @@id([projectId, positionTagId])
+  @@index([positionTagId], map: "positiongTagId")
+}
+
+model Session {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 enum UserSkillTag_proficiencyLevel {
   Beginner
   Intermediate
@@ -142,8 +161,7 @@ enum UserSkillTag_proficiencyLevel {
 }
 
 enum Applicant_status {
-  WAITING @map("대기")       // 데이터베이스 값: "대기"
-  ACCEPTED @map("합격")     // 데이터베이스 값: "합격"
-  REJECTED @map("불합격")   // 데이터베이스 값: "불합격"
+  WAITING  @map("대기")
+  ACCEPTED @map("합격")
+  REJECTED @map("불합격")
 }
-
