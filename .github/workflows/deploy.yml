@@ -40,12 +40,12 @@ jobs:
             git stash &&
             git fetch origin &&
             git checkout prod &&
-            git config pull.rebase false &&
             git pull origin prod &&
-            npm install &&
-            npm run build &&
-            npx prisma db pull && # 데이터베이스 상태를 Prisma에 반영
+            git config pull.rebase false &&
+            npm install && # 의존성 설치
+            npx prisma db push --accept-data-loss && # 데이터베이스 상태를 Prisma에 반영
             npx prisma generate && # Prisma Client 재생성
+            npm run build && 
             pm2 restart all
           "
           rm -f private_key.pem
