@@ -3,10 +3,12 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
+import { config } from 'dotenv';
+config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(bodyParser.json());
@@ -22,7 +24,7 @@ async function bootstrap() {
         in: 'header',
         name: 'JWT',
       },
-      'access-token',
+      'JWT',
     )
     .build();
 
@@ -33,7 +35,12 @@ async function bootstrap() {
       tagsSorter: 'alpha',
       operationsSorter: 'method',
     },
+    customSiteTitle: 'API 문서',
   });
-  await app.listen(3000);
+
+  // 서버 실행
+  const port = process.env.PORT;
+  await app.listen(port);
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();
