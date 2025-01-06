@@ -29,7 +29,7 @@ export class ProjectService {
     // 스킬 태그 조건 추가
     if (dto.skillTag && dto.skillTag.length > 0) {
       where.ProjectSkillTag = {
-        some: {
+        every: {
           skillTagId: { in: dto.skillTag },
         },
       };
@@ -47,14 +47,8 @@ export class ProjectService {
     }
 
     // 진행 방식 조건 추가
-    if (dto.method) {
-      where.Method = {
-        some: {
-          Method: {
-            id: dto.method,
-          },
-        },
-      };
+    if (dto.methodId) {
+      where.methodId = dto.methodId;
     }
 
     // 새싹 가능 조건 추가
