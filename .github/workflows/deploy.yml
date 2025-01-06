@@ -40,6 +40,7 @@ jobs:
             git stash &&
             git fetch origin &&
             git checkout prod &&
+            git config pull.rebase false && 
             git pull origin prod &&
             npm install &&
             npm run build &&
