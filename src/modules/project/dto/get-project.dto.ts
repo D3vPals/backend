@@ -40,7 +40,7 @@ export class GetManyProjectDTO {
   @IsNumber()
   @Type(() => Number)
   @IsOptional()
-  method?: number;
+  methodId?: number;
 
   @ApiProperty({
     example: true,
@@ -49,6 +49,7 @@ export class GetManyProjectDTO {
   })
   @IsBoolean()
   @IsOptional()
+  @Type(() => Boolean)
   isBeginner?: boolean;
 
   @ApiProperty({
