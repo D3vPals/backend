@@ -12,6 +12,7 @@ import { PositionTagModule } from './modules/position-tag/position-tag.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { MethodModule } from './modules/method/method.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -26,6 +27,9 @@ import { MethodModule } from './modules/method/method.module';
     UploadModule,
     PrismaModule,
     MethodModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
