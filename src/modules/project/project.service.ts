@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
-import { exclude } from 'src/helpers/exclude';
+import { PostProjectDTO } from './dto/create-project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -144,5 +144,17 @@ export class ProjectService {
     }
 
     return project;
+  }
+
+  async createProject({
+    authorId,
+    data,
+  }: {
+    authorId: number;
+    data: PostProjectDTO;
+  }) {
+    return await this.prismaService.project.create({
+      data: { authorId, ...data },
+    });
   }
 }
