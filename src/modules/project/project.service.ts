@@ -109,6 +109,8 @@ export class ProjectService {
 
   async incrementViews(id: number) {
     // views를 증가시킬 때만 호출
+    await this.fetchProject({ id });
+
     return this.prismaService.project.update({
       where: { id },
       data: { views: { increment: 1 } },
@@ -122,7 +124,7 @@ export class ProjectService {
       );
     }
 
-    const project = await this.prismaService.project.findFirst({
+    const project = await this.prismaService.project.findUnique({
       where: { id },
       include: {
         User: {
