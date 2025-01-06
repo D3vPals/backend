@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
@@ -109,11 +113,20 @@ export class ProjectService {
     };
   }
 
-  async fetchProject({ id }: { id: number }) {
-    await this.prismaService.project.update({
+  async incrementViews(id: number) {
+    // views를 증가시킬 때만 호출
+    return this.prismaService.project.update({
       where: { id },
       data: { views: { increment: 1 } },
     });
+  }
+
+  async fetchProject({ id }: { id: number }) {
+    if (id === 0 || isNaN(id)) {
+      throw new BadRequestException(
+        'Invalid ID: ID must be a valid number and not 0.',
+      );
+    }
 
     const project = await this.prismaService.project.findFirst({
       where: { id },
