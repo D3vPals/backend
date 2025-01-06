@@ -67,8 +67,8 @@ model Project {
   totalMember          Int
   startDate            DateTime             @db.Date
   estimatedPeriod      String               @db.VarChar(50)
-  methodId             Int?
-  authorId             Int?
+  methodId             Int
+  authorId             Int
   views                Int                  @default(0)
   isBeginner           Boolean              @default(false)
   isDone               Boolean              @default(false)

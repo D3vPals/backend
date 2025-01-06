@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
-import { exclude } from 'src/helpers/exclude';
+import { PostProjectDTO } from './dto/create-project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -144,5 +144,60 @@ export class ProjectService {
     }
 
     return project;
+  }
+
+  async createProject({
+    authorId,
+    data,
+  }: {
+    authorId: number;
+    data: PostProjectDTO;
+  }) {
+    const {
+      title,
+      description,
+      totalMember,
+      startDate,
+      estimatedPeriod,
+      methodId,
+      isBeginner,
+      recruitmentStartDate,
+      recruitmentEndDate,
+      skillTagId,
+      positionTagId,
+    } = data;
+
+    const createdProject = await this.prismaService.project.create({
+      data: {
+        title,
+        description,
+        totalMember,
+        startDate,
+        estimatedPeriod,
+        methodId,
+        isBeginner,
+        recruitmentStartDate,
+        recruitmentEndDate,
+        authorId,
+      },
+    });
+
+    // projectSkillTag 생성
+    await this.prismaService.projectSkillTag.createMany({
+      data: skillTagId.map((tagId) => ({
+        projectId: createdProject.id,
+        skillTagId: tagId,
+      })),
+    });
+
+    // projectPositionTag 생성
+    await this.prismaService.projectPositionTag.createMany({
+      data: positionTagId.map((tagId) => ({
+        projectId: createdProject.id,
+        positionTagId: tagId,
+      })),
+    });
+
+    return createdProject;
   }
 }
