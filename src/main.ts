@@ -8,7 +8,7 @@ config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(bodyParser.json());
@@ -38,7 +38,7 @@ async function bootstrap() {
     customSiteTitle: 'API 문서',
   });
 
-  // 서버 실행
+  // 서버 실행!
   const port = process.env.PORT;
   await app.listen(port);
   console.log(`Application is running on: http://localhost:${port}`);
