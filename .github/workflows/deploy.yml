@@ -44,6 +44,7 @@ jobs:
             git checkout prod &&
             git pull origin prod &&
             npm install &&
+            npm run build &&
             npm run start:migrate:prod &&
             pm2 restart all
           "
