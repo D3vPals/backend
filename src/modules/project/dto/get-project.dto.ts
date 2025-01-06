@@ -49,7 +49,9 @@ export class GetManyProjectDTO {
   })
   @IsBoolean()
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) =>
+    value === 'true' ? true : value === 'false' ? false : value,
+  )
   isBeginner?: boolean;
 
   @ApiProperty({
