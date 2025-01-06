@@ -7,7 +7,6 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
-  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import {
@@ -136,32 +135,10 @@ export class AuthController {
       },
     },
   })
-  @ApiResponse({
-    status: 400,
-    description: '유효하지 않은 인증 코드입니다.',
-    schema: {
-      example: {
-        message: '유효하지 않은 인증 코드입니다.',
-        error: 'Bad Request',
-        statusCode: 400,
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: '인증 코드가 만료되었습니다.',
-    schema: {
-      example: {
-        message: '인증 코드가 만료되었습니다.',
-        error: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
-  })
-  async postResetPassword(@CurrentUser() userId: number, @Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(userId, resetPasswordDto);
+  async postResetPassword(@Body() {email, newPassword}: ResetPasswordDto) {
+    return this.authService.resetPassword(email, newPassword);
   }
-
+   
   // POST: 로그아웃
   @Post('logout')
   @ApiOperation({
