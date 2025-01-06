@@ -30,6 +30,7 @@ export class PostProjectDTO {
     description: '시작 예정일',
   })
   @IsNotEmpty()
+  @Type(() => Date)
   startDate: Date;
 
   @ApiProperty({
@@ -54,13 +55,14 @@ export class PostProjectDTO {
   })
   @IsBoolean()
   @IsNotEmpty()
-  isBeginner: Boolean;
+  isBeginner: boolean;
 
   @ApiProperty({
     example: '2025-01-06',
     description: '모집 시작 날짜',
   })
   @IsNotEmpty()
+  @Type(() => Date)
   recruitmentStartDate: Date;
 
   @ApiProperty({
@@ -68,6 +70,7 @@ export class PostProjectDTO {
     description: '모집 마감 날짜',
   })
   @IsNotEmpty()
+  @Type(() => Date)
   recruitmentEndDate: Date;
 
   @ApiProperty({
@@ -79,7 +82,7 @@ export class PostProjectDTO {
   @Transform(({ value }) =>
     Array.isArray(value) ? value.map((v) => Number(v)) : [Number(value)],
   )
-  skillTag: number[];
+  skillTagId: number[];
 
   @ApiProperty({
     example: [1, 2],
@@ -90,5 +93,5 @@ export class PostProjectDTO {
   @Transform(({ value }) =>
     Array.isArray(value) ? value.map((v) => Number(v)) : [Number(value)],
   )
-  positionTag: number[];
+  positionTagId: number[];
 }

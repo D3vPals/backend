@@ -153,8 +153,51 @@ export class ProjectService {
     authorId: number;
     data: PostProjectDTO;
   }) {
-    return await this.prismaService.project.create({
-      data: { authorId, ...data },
+    const {
+      title,
+      description,
+      totalMember,
+      startDate,
+      estimatedPeriod,
+      methodId,
+      isBeginner,
+      recruitmentStartDate,
+      recruitmentEndDate,
+      skillTagId,
+      positionTagId,
+    } = data;
+
+    const createdProject = await this.prismaService.project.create({
+      data: {
+        title,
+        description,
+        totalMember,
+        startDate,
+        estimatedPeriod,
+        methodId,
+        isBeginner,
+        recruitmentStartDate,
+        recruitmentEndDate,
+        authorId,
+      },
     });
+
+    // projectSkillTag 생성
+    await this.prismaService.projectSkillTag.createMany({
+      data: skillTagId.map((tagId) => ({
+        projectId: createdProject.id,
+        skillTagId: tagId,
+      })),
+    });
+
+    // projectPositionTag 생성
+    await this.prismaService.projectPositionTag.createMany({
+      data: positionTagId.map((tagId) => ({
+        projectId: createdProject.id,
+        positionTagId: tagId,
+      })),
+    });
+
+    return createdProject;
   }
 }
