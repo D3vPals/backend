@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
@@ -16,5 +16,10 @@ export class ProjectController {
   @Get('count')
   async getProjectCount() {
     return await this.projectService.fetchProjectCount();
+  }
+
+  @Get(':id')
+  async getProject(@Param('id', ParseIntPipe) id: number) {
+    return await this.projectService.fetchProject({ id });
   }
 }

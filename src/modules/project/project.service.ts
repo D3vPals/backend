@@ -108,4 +108,30 @@ export class ProjectService {
       totalProjectCount,
     };
   }
+
+  async fetchProject({ id }: { id: number }) {
+    return await this.prismaService.project.findFirst({
+      where: { id },
+      include: {
+        User: {
+          select: {
+            id: true,
+            nickname: true,
+            email: true,
+            bio: true,
+            profileImg: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        ProjectSkillTag: {
+          include: { SkillTag: true },
+        },
+        Method: true,
+        ProjectPositionTag: {
+          include: { PositionTag: true },
+        },
+      },
+    });
+  }
 }
