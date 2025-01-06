@@ -52,7 +52,7 @@ export class ProjectService {
     }
 
     // 새싹 가능 조건 추가
-    if (dto.isBeginner) {
+    if (dto.isBeginner !== undefined) {
       where.isBeginner = dto.isBeginner;
     }
 
