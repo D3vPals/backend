@@ -316,4 +316,22 @@ export class ProjectService {
       return updatedProject;
     });
   }
+
+  async modifyProjectIsDone({
+    id,
+    authorId,
+  }: {
+    id: number;
+    authorId: number;
+  }) {
+    const project = await this.fetchProject({ id });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 마감 할 수 있습니다.');
+    }
+
+    return await this.prismaService.project.update({
+      where: { id },
+      data: { isDone: true },
+    });
+  }
 }

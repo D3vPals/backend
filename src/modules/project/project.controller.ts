@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -63,6 +64,19 @@ export class ProjectController {
     return await this.projectService.modifyProject({
       authorId: userId,
       data: body,
+      id,
+    });
+  }
+
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/is-done')
+  async patchProjectIsDone(
+    @CurrentUser() userId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.projectService.modifyProjectIsDone({
+      authorId: userId,
       id,
     });
   }

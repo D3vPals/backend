@@ -13,7 +13,6 @@ export class MethodService {
     const method = await this.prismaService.method.findUnique({
       where: { id },
     });
-    console.log(id);
     if (!method) {
       throw new NotFoundException('해당 진행 방식은 존재하지 않습니다.');
     }
