@@ -4,6 +4,7 @@ import { PositionTagService } from './position-tag.service';
 
 @Module({
   controllers: [PositionTagController],
-  providers: [PositionTagService]
+  providers: [PositionTagService],
+  exports: [PositionTagService],
 })
 export class PositionTagModule {}

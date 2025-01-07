@@ -1,16 +1,26 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
-import { PostProjectDTO } from './dto/create-project.dto';
+import { CreateProjectDTO } from './dto/create-project.dto';
+import { ModifyProjectDTO } from './dto/modify-project.dto';
+import { MethodService } from '../method/method.service';
+import { PositionTagService } from '../position-tag/position-tag.service';
+import { SkillTagService } from '../skill-tag/skill-tag.service';
 
 @Injectable()
 export class ProjectService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private methodService: MethodService,
+    private positionTagService: PositionTagService,
+    private skillTagService: SkillTagService,
+  ) {}
 
   async fetchManyProject(dto: GetManyProjectDTO) {
     const skipAmount = (dto.page - 1) * PAGE_SIZE;
@@ -160,7 +170,7 @@ export class ProjectService {
     data,
   }: {
     authorId: number;
-    data: PostProjectDTO;
+    data: CreateProjectDTO;
   }) {
     const {
       title,
@@ -208,5 +218,102 @@ export class ProjectService {
     });
 
     return createdProject;
+  }
+
+  async modifyProject({
+    authorId,
+    id,
+    data,
+  }: {
+    authorId: number;
+    id: number;
+    data: ModifyProjectDTO;
+  }) {
+    const {
+      title,
+      description,
+      totalMember,
+      startDate,
+      estimatedPeriod,
+      methodId,
+      isBeginner,
+      recruitmentStartDate,
+      recruitmentEndDate,
+      skillTagId,
+      positionTagId,
+    } = data;
+
+    const project = await this.fetchProject({ id });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 수정 가능합니다.');
+    }
+
+    if (methodId) {
+      // 진행 방식 검증
+      await this.methodService.fetchMethod({ id: methodId });
+    }
+
+    // 트랜잭션 실행
+    return await this.prismaService.$transaction(async (prisma) => {
+      // 프로젝트 정보 업데이트
+      const updatedProject = await prisma.project.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          totalMember,
+          startDate,
+          estimatedPeriod,
+          methodId,
+          isBeginner,
+          recruitmentStartDate,
+          recruitmentEndDate,
+        },
+      });
+
+      if (skillTagId) {
+        // 스킬 태그 검증
+        const skillTags = await Promise.all(
+          skillTagId.map((id) => this.skillTagService.fetchSkillTag({ id })),
+        );
+
+        // 기존 스킬 태그 삭제
+        await prisma.projectSkillTag.deleteMany({
+          where: { projectId: id },
+        });
+
+        // 새로운 스킬 태그 생성
+        await prisma.projectSkillTag.createMany({
+          data: skillTags.map((tag) => ({
+            projectId: id,
+            skillTagId: tag.id,
+          })),
+        });
+      }
+
+      if (positionTagId) {
+        // 포지션 태그 검증
+        const positionTags = await Promise.all(
+          positionTagId.map((id) =>
+            this.positionTagService.fetchPositionTag({ id }),
+          ),
+        );
+
+        // 기존 포지션 태그 삭제
+        await prisma.projectPositionTag.deleteMany({
+          where: { projectId: id },
+        });
+
+        // 새로운 포지션 태그 생성
+        await prisma.projectPositionTag.createMany({
+          data: positionTags.map((tag) => ({
+            projectId: id,
+            positionTagId: tag.id,
+          })),
+        });
+      }
+
+      return updatedProject;
+    });
   }
 }
