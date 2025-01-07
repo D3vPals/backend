@@ -33,6 +33,15 @@ export class ProjectController {
     return await this.projectService.fetchProjectCount();
   }
 
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Get('my')
+  async getManyMyProject(@CurrentUser() userId: number) {
+    return await this.projectService.fetchManyMyProject({
+      authorId: userId,
+    });
+  }
+
   @Get(':id')
   async getProject(@Param('id', ParseIntPipe) id: number) {
     await this.projectService.incrementViews(id);

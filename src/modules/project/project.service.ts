@@ -334,4 +334,15 @@ export class ProjectService {
       data: { isDone: true },
     });
   }
+
+  async fetchManyMyProject({ authorId }: { authorId: number }) {
+    return await this.prismaService.project.findMany({
+      where: { authorId },
+      include: {
+        ProjectSkillTag: { include: { SkillTag: true } },
+        ProjectPositionTag: { include: { PositionTag: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }
