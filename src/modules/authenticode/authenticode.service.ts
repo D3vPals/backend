@@ -1,11 +1,15 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import * as nodemailer from 'nodemailer';
+import { EmailService } from '../email/email.service';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthenticodeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+
+  ) {}
 
   // 메일 인증 코드 생성 및 발송
   async sendEmailCode(email: string): Promise<{ message: string }> {
@@ -13,19 +17,19 @@ export class AuthenticodeService {
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       throw new BadRequestException('유효한 이메일 형식이 아닙니다.');
     }
-  
+
     // 인증 코드 생성
     const code = crypto.randomInt(100000, 999999).toString();
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 10);
-  
+
     // 기존 인증 코드 무효화 및 새로운 인증 코드 저장
     try {
       await this.prisma.authenticode.updateMany({
         where: { userEmail: email, isUsed: false },
         data: { isUsed: true },
       });
-  
+
       await this.prisma.authenticode.create({
         data: { userEmail: email, code, expiresAt, isUsed: false },
       });
@@ -33,28 +37,16 @@ export class AuthenticodeService {
       console.error('데이터베이스 오류:', error);
       throw new BadRequestException('인증 코드 저장 중 오류가 발생했습니다.');
     }
-  
+
     // 이메일 발송
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  
-    try {
-      await transporter.sendMail({
-        from: `"DevPals 인증 코드" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'DevPals 인증 코드',
-        text: `인증 코드는 ${code}입니다. 10분 내에 입력해주세요.`,
-      });
-    } catch (error) {
-      console.error('메일 발송 오류:', error);
-      throw new BadRequestException('메일 발송에 실패했습니다.');
-    }
-  
+    await this.emailService.sendEmail(
+      email,
+      'DevPals 인증 코드',
+      '',
+      'authenticode', // 템플릿 이름
+      { code }, // 템플릿 데이터
+    );
+
     return { message: '인증 코드가 이메일로 전송되었습니다.' };
   }
 
