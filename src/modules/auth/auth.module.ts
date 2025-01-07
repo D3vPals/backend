@@ -7,7 +7,7 @@ import { UserService } from '../user/user.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuthenticodeService } from '../authenticode/authenticode.service';
+import { AuthenticodeModule } from '../authenticode/authenticode.module';
 
 @Module({
   imports: [
@@ -16,9 +16,10 @@ import { AuthenticodeService } from '../authenticode/authenticode.service';
       secret: process.env.JWT_ACCESS_SECRET, // 환경 변수로 관리
       signOptions: { expiresIn: '1h' },    // 기본 설정
     }),
+    AuthenticodeModule, 
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, AuthenticodeService, JwtStrategy, JwtAuthGuard, UserService],
+  providers: [AuthService, PrismaService, JwtStrategy, JwtAuthGuard, UserService],
   exports : [JwtModule, JwtAuthGuard]
 })
 export class AuthModule {}
