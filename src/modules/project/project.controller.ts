@@ -70,7 +70,7 @@ export class ProjectController {
 
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Patch(':id/is-done')
   async patchProjectIsDone(
     @CurrentUser() userId: number,
     @Param('id', ParseIntPipe) id: number,
