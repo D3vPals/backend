@@ -1,12 +1,13 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
 import { PAGE_SIZE } from 'src/constants/pagination';
-import { PostProjectDTO } from './dto/create-project.dto';
+import { ProjectDTO } from './dto/project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -160,7 +161,7 @@ export class ProjectService {
     data,
   }: {
     authorId: number;
-    data: PostProjectDTO;
+    data: ProjectDTO;
   }) {
     const {
       title,
@@ -208,5 +209,78 @@ export class ProjectService {
     });
 
     return createdProject;
+  }
+
+  async modifyProject({
+    authorId,
+    id,
+    data,
+  }: {
+    authorId: number;
+    id: number;
+    data: ProjectDTO;
+  }) {
+    const {
+      title,
+      description,
+      totalMember,
+      startDate,
+      estimatedPeriod,
+      methodId,
+      isBeginner,
+      recruitmentStartDate,
+      recruitmentEndDate,
+      skillTagId,
+      positionTagId,
+    } = data;
+
+    const project = await this.fetchProject({ id });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 수정 가능합니다.');
+    }
+
+    // 트랜잭션 실행
+    return await this.prismaService.$transaction(async (prisma) => {
+      // 1. 프로젝트 정보 업데이트
+      const updatedProject = await prisma.project.update({
+        where: { id },
+        data: {
+          title,
+          description,
+          totalMember,
+          startDate,
+          estimatedPeriod,
+          methodId,
+          isBeginner,
+          recruitmentStartDate,
+          recruitmentEndDate,
+        },
+      });
+
+      // 2. 기존 태그 삭제
+      await prisma.projectSkillTag.deleteMany({
+        where: { projectId: id },
+      });
+      await prisma.projectPositionTag.deleteMany({
+        where: { projectId: id },
+      });
+
+      // 3. 새로운 태그 생성
+      await prisma.projectSkillTag.createMany({
+        data: skillTagId.map((tagId) => ({
+          projectId: id,
+          skillTagId: tagId,
+        })),
+      });
+
+      await prisma.projectPositionTag.createMany({
+        data: positionTagId.map((tagId) => ({
+          projectId: id,
+          positionTagId: tagId,
+        })),
+      });
+
+      return updatedProject;
+    });
   }
 }

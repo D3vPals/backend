@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsNotEmpty, IsNumber } from 'class-validator';
 
-export class PostProjectDTO {
+export class ProjectDTO {
   @ApiProperty({
     example: '클론코딩 사이드 프로젝트 모집 공고',
     description: '공고 제목',

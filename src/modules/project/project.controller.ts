@@ -5,13 +5,14 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
-import { PostProjectDTO } from './dto/create-project.dto';
+import { ProjectDTO } from './dto/project.dto';
 import { CurrentUser } from 'src/decorators/curretUser.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 
@@ -40,13 +41,25 @@ export class ProjectController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async postProject(
-    @CurrentUser() userId: number,
-    @Body() body: PostProjectDTO,
-  ) {
+  async postProject(@CurrentUser() userId: number, @Body() body: ProjectDTO) {
     return await this.projectService.createProject({
       authorId: userId,
       data: body,
+    });
+  }
+
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  async putProject(
+    @CurrentUser() userId: number,
+    @Body() body: ProjectDTO,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return await this.projectService.modifyProject({
+      authorId: userId,
+      data: body,
+      id,
     });
   }
 }
