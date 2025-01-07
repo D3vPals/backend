@@ -12,9 +12,10 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { GetManyProjectDTO } from './dto/get-project.dto';
-import { ProjectDTO } from './dto/project.dto';
+import { CreateProjectDTO } from './dto/create-project.dto';
 import { CurrentUser } from 'src/decorators/curretUser.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
+import { ModifyProjectDTO } from './dto/modify-project.dto';
 
 @ApiTags('project')
 @Controller('project')
@@ -41,7 +42,10 @@ export class ProjectController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async postProject(@CurrentUser() userId: number, @Body() body: ProjectDTO) {
+  async postProject(
+    @CurrentUser() userId: number,
+    @Body() body: CreateProjectDTO,
+  ) {
     return await this.projectService.createProject({
       authorId: userId,
       data: body,
@@ -53,7 +57,7 @@ export class ProjectController {
   @Put(':id')
   async putProject(
     @CurrentUser() userId: number,
-    @Body() body: ProjectDTO,
+    @Body() body: ModifyProjectDTO,
     @Param('id', ParseIntPipe) id: number,
   ) {
     return await this.projectService.modifyProject({
