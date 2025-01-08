@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { UploadService } from '../upload/upload.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private s3Service: UploadService,
+  ) {}
 
   async checkNicknameAvailability(nickname: string): Promise<boolean> {
     const existingUser = await this.prisma.user.findUnique({
@@ -34,5 +38,32 @@ export class UserService {
       where: { email },
       data: { password: hashedPassword },
     });
+  }
+
+  async updateProfileImage(userId: number, fileBuffer: Buffer, fileType: string) {
+    console.log('updateProfileImage - userId:', userId); // 디버깅: userId 값 확인
+  
+    if (!userId) {
+      throw new BadRequestException('사용자 ID를 확인할 수 없습니다.');
+    }
+  
+    try {
+      const imageUrl = await this.s3Service.uploadImage(
+        'users',
+        userId,
+        fileBuffer,
+        fileType,
+      );
+  
+      const updatedUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: { profileImg: imageUrl },
+      });
+  
+      return updatedUser;
+    } catch (error) {
+      console.error('Error while updating profile image:', error);
+      throw new InternalServerErrorException('프로필 이미지 업데이트 중 오류가 발생했습니다.');
+    }
   }
 }
