@@ -17,11 +17,16 @@ import { CreateProjectDTO } from './dto/create-project.dto';
 import { CurrentUser } from 'src/decorators/curretUser.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ModifyProjectDTO } from './dto/modify-project.dto';
+import { CreateApplicantDTO } from '../applicant/dto/create-applicant.dto';
+import { ApplicantService } from '../applicant/applicant.service';
 
 @ApiTags('project')
 @Controller('project')
 export class ProjectController {
-  constructor(private projectService: ProjectService) {}
+  constructor(
+    private projectService: ProjectService,
+    private applicantService: ApplicantService,
+  ) {}
 
   @Get()
   async getManyProject(@Query() query: GetManyProjectDTO) {
@@ -87,6 +92,21 @@ export class ProjectController {
     return await this.projectService.modifyProjectIsDone({
       authorId: userId,
       id,
+    });
+  }
+
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/applicant')
+  async postApplicant(
+    @CurrentUser() userId: number,
+    @Body() body: CreateApplicantDTO,
+    @Param('id', ParseIntPipe) projectId: number,
+  ) {
+    return await this.applicantService.createApplicant({
+      userId,
+      projectId,
+      data: body,
     });
   }
 }

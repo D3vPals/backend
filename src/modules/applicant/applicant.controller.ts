@@ -1,9 +1,21 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ApplicantService } from './applicant.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CurrentUser } from '../../decorators/curretUser.decorator';
-import { SendEmailDTO } from "./dto/send-email.dto"
+import { SendEmailDTO } from './dto/send-email.dto';
 
 @ApiTags('applicant')
 @Controller('applicant')
@@ -39,9 +51,15 @@ export class ApplicantController {
   })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  async postSendEmailsToAcceptedApplicants(@Body() { projectId }: SendEmailDTO, @CurrentUser() userId: number) {
-
-    await this.applicantService.sendEmailsToApplicantsByStatus({ projectId, status: 'ACCEPTED', userId });
+  async postSendEmailsToAcceptedApplicants(
+    @Body() { projectId }: SendEmailDTO,
+    @CurrentUser() userId: number,
+  ) {
+    await this.applicantService.sendEmailsToApplicantsByStatus({
+      projectId,
+      status: 'ACCEPTED',
+      userId,
+    });
 
     return { message: '이메일 전송 완료' };
   }
@@ -75,9 +93,15 @@ export class ApplicantController {
   })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  async postSendEmailsToRejectedApplicants(@Body() { projectId }: SendEmailDTO, @CurrentUser() userId: number) {
-    
-    await this.applicantService.sendEmailsToApplicantsByStatus({ projectId, status: 'REJECTED', userId });
+  async postSendEmailsToRejectedApplicants(
+    @Body() { projectId }: SendEmailDTO,
+    @CurrentUser() userId: number,
+  ) {
+    await this.applicantService.sendEmailsToApplicantsByStatus({
+      projectId,
+      status: 'REJECTED',
+      userId,
+    });
 
     return { message: '이메일 전송 완료' };
   }
