@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
 import { JwtModule } from '@nestjs/jwt';
@@ -15,7 +15,7 @@ import { ApplicantModule } from '../applicant/applicant.module';
     PositionTagModule,
     MethodModule,
     SkillTagModule,
-    ApplicantModule,
+    forwardRef(() => ApplicantModule),
   ],
   exports: [ProjectService],
 })
