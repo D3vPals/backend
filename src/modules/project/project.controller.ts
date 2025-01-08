@@ -109,4 +109,17 @@ export class ProjectController {
       data: body,
     });
   }
+
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/applicant')
+  async getApplicant(
+    @CurrentUser() userId: number,
+    @Param('id', ParseIntPipe) projectId: number,
+  ) {
+    return await this.applicantService.fetchManyApplicant({
+      authorId: userId,
+      projectId,
+    });
+  }
 }

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -96,6 +97,35 @@ export class ApplicantService {
     await this.projectService.fetchProject({ id: projectId });
     return await this.prisma.applicant.create({
       data: { projectId, userId, ...data },
+    });
+  }
+
+  async fetchManyApplicant({
+    projectId,
+    authorId,
+  }: {
+    projectId: number;
+    authorId: number;
+  }) {
+    const project = await this.projectService.fetchProject({ id: projectId });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 조회 가능합니다.');
+    }
+
+    return await this.prisma.applicant.findMany({
+      where: { projectId },
+      include: {
+        User: {
+          select: {
+            id: true,
+            nickname: true,
+            email: true,
+            bio: true,
+            profileImg: true,
+            UserSkillTag: { include: { SkillTag: true } },
+          },
+        },
+      },
     });
   }
 }
