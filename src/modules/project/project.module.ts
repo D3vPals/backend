@@ -10,5 +10,6 @@ import { SkillTagModule } from '../skill-tag/skill-tag.module';
   controllers: [ProjectController],
   providers: [ProjectService],
   imports: [JwtModule, PositionTagModule, MethodModule, SkillTagModule],
+  exports: [ProjectService]
 })
 export class ProjectModule {}
