@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +14,7 @@ import { ModifyProjectDTO } from './dto/modify-project.dto';
 import { MethodService } from '../method/method.service';
 import { PositionTagService } from '../position-tag/position-tag.service';
 import { SkillTagService } from '../skill-tag/skill-tag.service';
+import { ApplicantService } from '../applicant/applicant.service';
 
 @Injectable()
 export class ProjectService {
@@ -20,6 +23,8 @@ export class ProjectService {
     private methodService: MethodService,
     private positionTagService: PositionTagService,
     private skillTagService: SkillTagService,
+    @Inject(forwardRef(() => ApplicantService))
+    private applicantService: ApplicantService,
   ) {}
 
   async fetchManyProject(dto: GetManyProjectDTO) {
@@ -155,6 +160,7 @@ export class ProjectService {
         ProjectPositionTag: {
           include: { PositionTag: true },
         },
+        Applicant: { include: { User: true } },
       },
     });
 
@@ -328,6 +334,18 @@ export class ProjectService {
     if (project.authorId !== authorId) {
       throw new ForbiddenException('기획자만 마감 할 수 있습니다.');
     }
+
+    await this.applicantService.modifyApplicantReject({
+      projectId: id,
+      authorId,
+      status: 'REJECTED',
+    });
+
+    await this.applicantService.sendEmailsToApplicantsByStatus({
+      projectId: id,
+      status: 'ACCEPTED',
+      userId: authorId,
+    });
 
     return await this.prismaService.project.update({
       where: { id },
