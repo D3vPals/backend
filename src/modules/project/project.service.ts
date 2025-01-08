@@ -346,6 +346,11 @@ export class ProjectService {
       status: 'ACCEPTED',
       userId: authorId,
     });
+    await this.applicantService.sendEmailsToApplicantsByStatus({
+      projectId: id,
+      status: 'REJECTED',
+      userId: authorId,
+    });
 
     return await this.prismaService.project.update({
       where: { id },
