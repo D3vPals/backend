@@ -50,12 +50,6 @@ export class ApplicantService {
       include: { Project: true },
     });
 
-    if (!applicants.length) {
-      throw new NotFoundException(
-        `${status === 'ACCEPTED' ? '합격' : '불합격'}한 지원자가 없습니다.`,
-      );
-    }
-
     // 4. 이메일 전송을 위한 데이터 구성
     for (const applicant of applicants) {
       const { email, Project } = applicant;
