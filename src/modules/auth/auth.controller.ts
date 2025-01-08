@@ -145,7 +145,6 @@ export class AuthController {
     summary: '로그아웃',
     description: '로그아웃을 수행하고 세션을 무효화합니다.',
   })
-  @ApiBearerAuth('JWT')
   @ApiResponse({
     status: 201,
     description: '로그아웃 성공',
@@ -166,6 +165,7 @@ export class AuthController {
       },
     },
   })
+  @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   async postLogout(@CurrentUser() userId: number) {
     await this.authService.logout(userId);

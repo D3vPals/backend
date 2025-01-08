@@ -13,8 +13,8 @@ model Applicant {
   userId      Int?
   projectId   Int?
   message     String?           @db.Text
-  email       String?           @db.Char(1)
-  phoneNumber String?           @db.Char(1)
+  email       String?           @db.VarChar(255) // 최대 255자로 설정
+  phoneNumber String?           @db.VarChar(15)  // 최대 15자로 설정 (국제 전화번호 기준)
   career      String?           @db.Text
   status      Applicant_status? @default(WAITING)
   createdAt   DateTime?         @default(now()) @db.Timestamp(0)

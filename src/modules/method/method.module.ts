@@ -4,6 +4,7 @@ import { MethodService } from './method.service';
 
 @Module({
   controllers: [MethodController],
-  providers: [MethodService]
+  providers: [MethodService],
+  exports: [MethodService],
 })
 export class MethodModule {}

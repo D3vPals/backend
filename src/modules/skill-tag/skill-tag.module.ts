@@ -4,6 +4,7 @@ import { SkillTagService } from './skill-tag.service';
 
 @Module({
   controllers: [SkillTagController],
-  providers: [SkillTagService]
+  providers: [SkillTagService],
+  exports: [SkillTagService],
 })
 export class SkillTagModule {}
