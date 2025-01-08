@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthenticodeController } from './authenticode.controller';
 import { AuthenticodeService } from './authenticode.service';
 import { EmailModule } from '../email/email.module';
 
 @Module({
-  imports: [EmailModule],
+  imports: [forwardRef(() => EmailModule)],
   controllers: [AuthenticodeController],
-  providers: [AuthenticodeService]
+  providers: [AuthenticodeService],
 })
 export class AuthenticodeModule {}

@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +14,7 @@ import { ModifyProjectDTO } from './dto/modify-project.dto';
 import { MethodService } from '../method/method.service';
 import { PositionTagService } from '../position-tag/position-tag.service';
 import { SkillTagService } from '../skill-tag/skill-tag.service';
+import { ApplicantService } from '../applicant/applicant.service';
 
 @Injectable()
 export class ProjectService {
@@ -20,6 +23,8 @@ export class ProjectService {
     private methodService: MethodService,
     private positionTagService: PositionTagService,
     private skillTagService: SkillTagService,
+    @Inject(forwardRef(() => ApplicantService))
+    private applicantService: ApplicantService,
   ) {}
 
   async fetchManyProject(dto: GetManyProjectDTO) {
@@ -155,6 +160,7 @@ export class ProjectService {
         ProjectPositionTag: {
           include: { PositionTag: true },
         },
+        Applicant: { include: { User: true } },
       },
     });
 
@@ -326,13 +332,47 @@ export class ProjectService {
   }) {
     const project = await this.fetchProject({ id });
     if (project.authorId !== authorId) {
-      throw new ForbiddenException('기획자만 마감 할 수 있습니다.');
+      throw new ForbiddenException('기획자만 마감할 수 있습니다.');
     }
 
-    return await this.prismaService.project.update({
-      where: { id },
-      data: { isDone: true },
-    });
+    try {
+      // 상태 변경과 이메일 전송 병렬 처리
+      const modifyRejectPromise = this.applicantService.modifyApplicantReject({
+        projectId: id,
+        authorId,
+        status: 'REJECTED',
+      });
+
+      const sendAcceptedEmailsPromise =
+        this.applicantService.sendEmailsToApplicantsByStatus({
+          projectId: id,
+          status: 'ACCEPTED',
+          userId: authorId,
+        });
+
+      const sendRejectedEmailsPromise =
+        this.applicantService.sendEmailsToApplicantsByStatus({
+          projectId: id,
+          status: 'REJECTED',
+          userId: authorId,
+        });
+
+      // 병렬 처리 완료 대기
+      await Promise.all([
+        modifyRejectPromise,
+        sendAcceptedEmailsPromise,
+        sendRejectedEmailsPromise,
+      ]);
+
+      // 프로젝트 상태 업데이트
+      return await this.prismaService.project.update({
+        where: { id },
+        data: { isDone: true },
+      });
+    } catch (error) {
+      console.error('Error processing project completion:', error);
+      throw error; // 에러를 다시 던져 호출자에게 알림
+    }
   }
 
   async fetchManyMyProject({ authorId }: { authorId: number }) {

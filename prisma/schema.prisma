@@ -112,6 +112,7 @@ model User {
   password     String         @db.VarChar(255)
   bio          String?        @db.Text
   profileImg   String?        @db.Text
+  userLevel    UserLevel?     @default(Beginner) // 유저별 등급 추가
   createdAt    DateTime?      @default(now()) @db.Timestamp(0)
   updatedAt    DateTime?      @default(now()) @db.Timestamp(0)
   Applicant    Applicant[]
@@ -124,7 +125,6 @@ model User {
 model UserSkillTag {
   userId           Int
   skillTagId       Int
-  proficiencyLevel UserSkillTag_proficiencyLevel? @default(Beginner)
   createdAt        DateTime?                      @default(now()) @db.Timestamp(0)
   User             User                           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "UserSkillTag_ibfk_1")
   SkillTag         SkillTag                       @relation(fields: [skillTagId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "UserSkillTag_ibfk_2")
@@ -152,7 +152,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-enum UserSkillTag_proficiencyLevel {
+enum UserLevel {
   Beginner
   Intermediate
   Advanced
