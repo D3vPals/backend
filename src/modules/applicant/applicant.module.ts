@@ -6,7 +6,11 @@ import { AuthModule } from '../auth/auth.module';
 import { ProjectModule } from '../project/project.module';
 
 @Module({
-  imports: [EmailModule, AuthModule, forwardRef(() => ProjectModule)],
+  imports: [
+    forwardRef(() => EmailModule),
+    forwardRef(() => AuthModule),
+    forwardRef(() => ProjectModule),
+  ],
   controllers: [ApplicantController],
   providers: [ApplicantService],
   exports: [ApplicantService],

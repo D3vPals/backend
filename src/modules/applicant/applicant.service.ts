@@ -16,6 +16,7 @@ import { CreateApplicantDTO } from './dto/create-applicant.dto';
 export class ApplicantService {
   constructor(
     private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => EmailService))
     private readonly emailService: EmailService,
     @Inject(forwardRef(() => ProjectService))
     private readonly projectService: ProjectService,

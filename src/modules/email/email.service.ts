@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -12,6 +17,7 @@ export class EmailService {
 
   constructor(
     private prismaService: PrismaService,
+    @Inject(forwardRef(() => ApplicantService))
     private applicantService: ApplicantService,
   ) {
     this.transporter = nodemailer.createTransport({
