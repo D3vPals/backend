@@ -4,6 +4,8 @@ import {
   BadRequestException,
   UnauthorizedException,
   ForbiddenException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -15,6 +17,7 @@ export class ApplicantService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    @Inject(forwardRef(() => ProjectService))
     private readonly projectService: ProjectService,
   ) {}
 
@@ -126,6 +129,28 @@ export class ApplicantService {
           },
         },
       },
+    });
+  }
+
+  async modifyApplicantReject({
+    projectId,
+    authorId,
+    status,
+  }: {
+    authorId: number;
+    projectId: number;
+    status: 'REJECTED';
+  }) {
+    const project = await this.projectService.fetchProject({
+      id: projectId,
+    });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 수정 가능합니다.');
+    }
+
+    return await this.prisma.applicant.updateMany({
+      where: { projectId, status: 'WAITING' },
+      data: { status },
     });
   }
 }
