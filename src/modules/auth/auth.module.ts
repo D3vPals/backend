@@ -15,13 +15,19 @@ import { UploadModule } from '../upload/upload.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET, // 환경 변수로 관리
-      signOptions: { expiresIn: '1h' },    // 기본 설정
+      signOptions: { expiresIn: '1h' }, // 기본 설정
     }),
     AuthenticodeModule,
     UploadModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, JwtStrategy, JwtAuthGuard, UserService],
-  exports : [JwtModule, JwtAuthGuard]
+  providers: [
+    AuthService,
+    PrismaService,
+    JwtStrategy,
+    JwtAuthGuard,
+    UserService,
+  ],
+  exports: [JwtModule, JwtAuthGuard],
 })
 export class AuthModule {}
