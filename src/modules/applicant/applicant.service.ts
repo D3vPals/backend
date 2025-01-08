@@ -29,16 +29,18 @@ export class ApplicantService {
   }: {
     projectId: number;
     status: 'ACCEPTED' | 'REJECTED';
-    userId: number;
+    userId?: number;
   }): Promise<void> {
     // 1. 해당 프로젝트 정보 조회
     const project = await this.projectService.fetchProject({
       id: projectId, // projectId가 제대로 전달되도록 수정
     });
 
-    // 2. 프로젝트의 authorId와 현재 로그인한 userId가 일치하는지 확인
-    if (project.authorId !== userId) {
-      throw new UnauthorizedException('이 프로젝트에 대한 권한이 없습니다.');
+    if (userId) {
+      // 2. 프로젝트의 authorId와 현재 로그인한 userId가 일치하는지 확인
+      if (project.authorId !== userId) {
+        throw new UnauthorizedException('이 프로젝트에 대한 권한이 없습니다.');
+      }
     }
 
     // 3. 상태에 맞는 지원자 정보 조회
@@ -131,15 +133,17 @@ export class ApplicantService {
     authorId,
     status,
   }: {
-    authorId: number;
+    authorId?: number;
     projectId: number;
     status: 'REJECTED';
   }) {
     const project = await this.projectService.fetchProject({
       id: projectId,
     });
-    if (project.authorId !== authorId) {
-      throw new ForbiddenException('기획자만 수정 가능합니다.');
+    if (authorId) {
+      if (project.authorId !== authorId) {
+        throw new ForbiddenException('기획자만 수정 가능합니다.');
+      }
     }
 
     return await this.prisma.applicant.updateMany({
