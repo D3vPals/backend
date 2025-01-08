@@ -55,9 +55,15 @@ export class UserService {
         fileType,
       );
   
+      // 프로필 이미지 업데이트
       const updatedUser = await this.prisma.user.update({
         where: { id: userId },
         data: { profileImg: imageUrl },
+        select: {
+          id: true, // 필요한 필드만 선택
+          nickname: true,
+          profileImg: true,
+        },
       });
   
       return updatedUser;
