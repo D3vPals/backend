@@ -152,4 +152,23 @@ export class ApplicantService {
       data: { status },
     });
   }
+
+  async fetchApplicantByStatus({
+    projectId,
+    authorId,
+  }: {
+    projectId: number;
+    authorId: number;
+  }) {
+    const allApplicant = await this.fetchManyApplicant({
+      projectId,
+      authorId,
+    });
+
+    // 상태별 필터링
+    const accepted = allApplicant.filter((a) => a.status === 'ACCEPTED');
+    const rejected = allApplicant.filter((a) => a.status === 'REJECTED');
+
+    return { accepted, rejected };
+  }
 }

@@ -668,6 +668,17 @@ export class ProjectController {
       },
     },
   })
+  @ApiResponse({
+    status: 404,
+    description: '해당 공고가 없는 경우',
+    schema: {
+      example: {
+        message: '해당 공고는 존재하지 않습니다.',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Get(':id/applicant')
@@ -676,6 +687,90 @@ export class ProjectController {
     @Param('id', ParseIntPipe) projectId: number,
   ) {
     return await this.applicantService.fetchManyApplicant({
+      authorId: userId,
+      projectId,
+    });
+  }
+
+  // GET: 해당 공고 합격자/불합격자 목록
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '공고 합격자/불합격자 목록',
+    description: '관리자(본인)가 합격자/불합격자 목록을 확인합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '공고 합격자/불합격자 목록 가져오기 성공',
+    schema: {
+      example: {
+        accepted: [
+          {
+            id: 7,
+            userId: 8,
+            projectId: 6,
+            message: '기획자에게 하고 싶은 말',
+            email: 'devpals@mail.com',
+            phoneNumber: '010-0000-0000',
+            career: null,
+            status: 'ACCEPTED',
+            createdAt: '2025-01-08T17:54:43.000Z',
+            updatedAt: '2025-01-09T10:07:20.000Z',
+            User: {
+              id: 8,
+              nickname: '김개발',
+              email: 'devpals@mail.com',
+              bio: null,
+              profileImg: '프로필 이미지 주소',
+              UserSkillTag: [
+                {
+                  userId: 8,
+                  skillTagId: 28,
+                  createdAt: '2025-01-08T11:57:17.000Z',
+                  SkillTag: {
+                    id: 28,
+                    name: 'Figma',
+                    img: '스킬 태그 이미지 주소',
+                    createdAt: '2025-01-02T15:11:15.000Z',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        rejected: [],
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: '해당 공고 작성자(기획자)가 아닌 경우',
+    schema: {
+      example: {
+        message: '해당 공고의 기획자만 조회 가능합니다.',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '해당 공고가 없는 경우',
+    schema: {
+      example: {
+        message: '해당 공고는 존재하지 않습니다.',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/applicant/summary')
+  async getApplicantByStatus(
+    @CurrentUser() userId: number,
+    @Param('id', ParseIntPipe) projectId: number,
+  ) {
+    return await this.applicantService.fetchApplicantByStatus({
       authorId: userId,
       projectId,
     });
