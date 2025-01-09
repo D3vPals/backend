@@ -112,6 +112,9 @@ model User {
   password     String         @db.VarChar(255)
   bio          String?        @db.Text
   profileImg   String?        @db.Text
+  github       String?        @db.VarChar(255)  // GitHub URL 추가
+  position     String?        @db.VarChar(100)  // 포지션 추가
+  career       String?        @db.Text          // 경력 추가
   userLevel    UserLevel?     @default(Beginner) // 유저별 등급 추가
   createdAt    DateTime?      @default(now()) @db.Timestamp(0)
   updatedAt    DateTime?      @default(now()) @db.Timestamp(0)
