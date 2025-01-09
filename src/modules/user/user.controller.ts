@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Get,
+  Param,
   UseGuards,
   InternalServerErrorException 
  } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { CurrentUser } from '../../decorators/curretUser.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CheckNicknameDto } from './dto/check-nickname.dto';
 import { ApplicationStatusDto } from './dto/application-status.dto';
+import { MyInfoResponseDto } from './dto/my-info-response.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -218,5 +220,82 @@ export class UserController {
     return applications;
   }
 
+    // 내 정보 조회
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '내 정보 보기',
+    description: '인증된 사용자의 정보를 반환하며, 포지션, 깃허브 링크, 경력, 스킬셋 등을 포함합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용자의 정보 반환',
+    type: MyInfoResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: '유효하지 않거나 만료된 토큰입니다.',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 정보가 존재하지 않을 경우',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: '사용자 정보를 찾을 수 없습니다.',
+        error: 'Not Found',
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  async getMyInfo(@CurrentUser() userId: number): Promise<MyInfoResponseDto> {
+    return this.userService.getUserInfoWithSkills(userId);
+  }
+  
+  // 다른 사용자 정보 조회
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '다른 사용자 정보 보기',
+    description: '특정 사용자의 정보를 반환합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용자의 정보 반환',
+    type: MyInfoResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 요청 - 사용자 ID 형식이 잘못되었거나 누락됨',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: '잘못된 사용자 ID입니다.',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 정보가 존재하지 않을 경우',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: '사용자 정보를 찾을 수 없습니다.',
+        error: 'Not Found',
+      },
+    },
+  })
+  async getOtherUserInfo(@Param('id') id: number): Promise<MyInfoResponseDto> {
+    return this.userService.getUserInfoWithSkills(id);
+  }
 
 }
