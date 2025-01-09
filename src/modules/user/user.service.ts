@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, InternalServerErrorException } from '@
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UploadService } from '../upload/upload.service';
+import { ApplicationStatusDto } from './dto/application-status.dto';
 
 @Injectable()
 export class UserService {
@@ -70,6 +71,54 @@ export class UserService {
     } catch (error) {
       console.error('Error while updating profile image:', error);
       throw new InternalServerErrorException('프로필 이미지 업데이트 중 오류가 발생했습니다.');
+    }
+  }
+
+  async getApplicationsByUserId(userId: number): Promise<ApplicationStatusDto[]> {
+    try {
+      const applications = await this.prisma.applicant.findMany({
+        where: { userId },
+        include: {
+          Project: {
+            select: {
+              title: true,
+              recruitmentEndDate: true, // 모집 종료 날짜를 가져옴
+            },
+          },
+        },
+      });
+  
+      // 모집 종료 여부를 기준으로 상태를 필터링
+      const currentDate = new Date();
+  
+      return applications
+        .map((application) => {
+          const isRecruitmentEnded = application.Project?.recruitmentEndDate
+            ? new Date(application.Project.recruitmentEndDate) < currentDate
+            : false;
+  
+          // 모집 종료 시 불합격 처리
+          if (isRecruitmentEnded && application.status !== 'ACCEPTED') {
+            return {
+              projectTitle: application.Project?.title || '프로젝트 없음',
+              status: 'REJECTED',
+            };
+          }
+  
+          // 합격 상태 또는 이미 불합격인 경우만 반환
+          if (application.status === 'ACCEPTED' || application.status === 'REJECTED') {
+            return {
+              projectTitle: application.Project?.title || '프로젝트 없음',
+              status: application.status,
+            };
+          }
+  
+          return null; // WAITING 상태는 표시하지 않음
+        })
+        .filter((item) => item !== null); // null 값 제거
+    } catch (error) {
+      console.error('Error while fetching applications:', error);
+      throw new InternalServerErrorException('지원한 프로젝트를 불러오는 중 오류가 발생했습니다.');
     }
   }
 }

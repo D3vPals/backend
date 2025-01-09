@@ -109,7 +109,7 @@ export class ApplicantService {
   }) {
     const project = await this.projectService.fetchProject({ id: projectId });
     if (project.authorId !== authorId) {
-      throw new ForbiddenException('기획자만 조회 가능합니다.');
+      throw new ForbiddenException('해당 공고의 기획자만 조회 가능합니다.');
     }
 
     return await this.prisma.applicant.findMany({
@@ -149,6 +149,64 @@ export class ApplicantService {
 
     return await this.prisma.applicant.updateMany({
       where: { projectId, status: 'WAITING' },
+      data: { status },
+    });
+  }
+
+  async fetchApplicantByStatus({
+    projectId,
+    authorId,
+  }: {
+    projectId: number;
+    authorId: number;
+  }) {
+    const allApplicant = await this.fetchManyApplicant({
+      projectId,
+      authorId,
+    });
+
+    // 상태별 필터링
+    const accepted = allApplicant.filter((a) => a.status === 'ACCEPTED');
+    const rejected = allApplicant.filter((a) => a.status === 'REJECTED');
+
+    return { accepted, rejected };
+  }
+
+  async modifyApplicantStatus({
+    projectId,
+    authorId,
+    userId,
+    status,
+  }: {
+    authorId: number;
+    userId: number;
+    projectId: number;
+    status: 'ACCEPTED' | 'WAITING' | 'REJECTED';
+  }) {
+    const project = await this.projectService.fetchProject({
+      id: projectId,
+    });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 수정 가능합니다.');
+    }
+    if (project.isDone) {
+      throw new BadRequestException(
+        '마감한 공고는 지원자의 상태를 변경할 수 없습니다.',
+      );
+    }
+
+    const applicant = await this.prisma.applicant.findFirst({
+      where: { projectId, userId },
+    });
+    if (!applicant) {
+      throw new NotFoundException('지원자를 찾을 수 없습니다.');
+    }
+    if (applicant.status === status) {
+      throw new BadRequestException('상태가 이미 동일합니다.');
+    }
+
+    return await this.prisma.applicant.update({
+      where: { id: applicant.id },
       data: { status },
     });
   }
