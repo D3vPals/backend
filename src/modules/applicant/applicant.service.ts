@@ -171,4 +171,38 @@ export class ApplicantService {
 
     return { accepted, rejected };
   }
+
+  async modifyApplicantStatus({
+    projectId,
+    authorId,
+    userId,
+    status,
+  }: {
+    authorId: number;
+    userId: number;
+    projectId: number;
+    status: 'ACCEPTED' | 'WAITING' | 'REJECTED';
+  }) {
+    const project = await this.projectService.fetchProject({
+      id: projectId,
+    });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 수정 가능합니다.');
+    }
+
+    const applicant = await this.prisma.applicant.findFirst({
+      where: { projectId, userId },
+    });
+    if (!applicant) {
+      throw new NotFoundException('지원자를 찾을 수 없습니다.');
+    }
+    if (applicant.status === status) {
+      throw new BadRequestException('상태가 이미 동일합니다.');
+    }
+
+    return await this.prisma.applicant.update({
+      where: { id: applicant.id },
+      data: { status },
+    });
+  }
 }
