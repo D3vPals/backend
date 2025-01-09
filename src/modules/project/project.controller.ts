@@ -26,6 +26,7 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { ModifyProjectDTO } from './dto/modify-project.dto';
 import { CreateApplicantDTO } from '../applicant/dto/create-applicant.dto';
 import { ApplicantService } from '../applicant/applicant.service';
+import { ModifyApplicantStatusDTO } from '../applicant/dto/modify-applicant-status.dto';
 
 @ApiTags('project')
 @Controller('project')
@@ -773,6 +774,91 @@ export class ProjectController {
     return await this.applicantService.fetchApplicantByStatus({
       authorId: userId,
       projectId,
+    });
+  }
+
+  // PATCH: 합격/불합격/대기 상태 선택
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '지원자 상태 변경',
+    description: '관리자(본인)가 지원자의 상태를 변경합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '지원자의 상태 변경 성공',
+    schema: {
+      example: {
+        id: 7,
+        userId: 8,
+        projectId: 6,
+        message: '기획자에게 하고 싶은 말',
+        email: 'devpals@mail.com',
+        phoneNumber: null,
+        career: null,
+        status: 'REJECTED',
+        createdAt: '2025-01-08T17:54:43.000Z',
+        updatedAt: '2025-01-09T10:48:35.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: '해당 공고 작성자(기획자)가 아닌 경우',
+    schema: {
+      example: {
+        message: '기획자만 수정 가능합니다.',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '해당 공고가 없는 경우',
+    schema: {
+      example: {
+        message: '해당 공고는 존재하지 않습니다.',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '해당 지원자가 없는 경우',
+    schema: {
+      example: {
+        message: '지원자를 찾을 수 없습니다.',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: '같은 상태로 바꾸려고 하는 경우',
+    schema: {
+      example: {
+        message: '상태가 이미 동일합니다.',
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Patch(':projectId/applicant/:applicantId/status')
+  async patchApplicantByStatus(
+    @CurrentUser() userId: number,
+    @Param('projectId', ParseIntPipe) projectId: number,
+    @Param('applicantId', ParseIntPipe) applicantId: number,
+    @Body() { status }: ModifyApplicantStatusDTO,
+  ) {
+    return await this.applicantService.modifyApplicantStatus({
+      authorId: userId,
+      projectId,
+      userId: applicantId,
+      status,
     });
   }
 }
