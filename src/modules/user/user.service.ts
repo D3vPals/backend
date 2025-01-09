@@ -72,4 +72,25 @@ export class UserService {
       throw new InternalServerErrorException('프로필 이미지 업데이트 중 오류가 발생했습니다.');
     }
   }
+
+  async getApplicationsByUserId(userId: number) {
+    try {
+      const applications = await this.prisma.applicant.findMany({
+        where: { userId },
+        include: {
+          Project: {
+            select: { title: true },
+          },
+        },
+      });
+  
+      return applications.map((application) => ({
+        projectTitle: application.Project?.title || '프로젝트 없음',
+        status: application.status,
+      }));
+    } catch (error) {
+      console.error('Error while fetching applications:', error);
+      throw new InternalServerErrorException('지원한 프로젝트를 불러오는 중 오류가 발생했습니다.');
+    }
+  }
 }
