@@ -7,6 +7,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class MethodController {
   constructor(private methodService: MethodService) {}
 
+  // GET: 진행 방식 목록
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '진행 방식 목록',

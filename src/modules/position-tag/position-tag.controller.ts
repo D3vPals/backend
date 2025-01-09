@@ -7,6 +7,7 @@ import { PositionTagService } from './position-tag.service';
 export class PositionTagController {
   constructor(private positionTagService: PositionTagService) {}
 
+  // GET: 포지션 태그 목록
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '포지션 태그 목록',

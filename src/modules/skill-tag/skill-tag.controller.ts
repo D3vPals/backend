@@ -7,6 +7,7 @@ import { SkillTagService } from './skill-tag.service';
 export class SkillTagController {
   constructor(private skillTagService: SkillTagService) {}
 
+  // GET: 스킬 태그 목록
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '스킬 태그 목록',

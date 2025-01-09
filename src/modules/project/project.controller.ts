@@ -34,6 +34,8 @@ export class ProjectController {
     private projectService: ProjectService,
     private applicantService: ApplicantService,
   ) {}
+
+  // GET: 공고 목록
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '공고 목록',
@@ -121,6 +123,7 @@ export class ProjectController {
     return await this.projectService.fetchManyProject(query);
   }
 
+  // GET: 공고 목록 개수(진행/마감/전체)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '진행중 / 마감 / 전체 공고 개수',
@@ -214,6 +217,7 @@ export class ProjectController {
     });
   }
 
+  // GET: 공고 상세보기
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '공고 상세보기',
@@ -328,6 +332,7 @@ export class ProjectController {
     return await this.projectService.fetchProject({ id });
   }
 
+  // POST: 공고 등록
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: '공고 등록하기',
@@ -402,6 +407,7 @@ export class ProjectController {
     });
   }
 
+  // PUT: 공고 수정
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '공고 수정하기',
@@ -489,6 +495,7 @@ export class ProjectController {
     });
   }
 
+  // PATCH: 공고 모집 종료
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '공고 모집 종료',
@@ -541,6 +548,7 @@ export class ProjectController {
     });
   }
 
+  // POST: 공고 지원
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: '공고 지원하기',
@@ -601,6 +609,7 @@ export class ProjectController {
     });
   }
 
+  // GET: 해당 공고 지원자 목록
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '공고 지원자 목록',
