@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import * as crypto from 'crypto';
@@ -58,11 +58,17 @@ export class AuthenticodeService {
   
     // 인증 코드 유효성 검증
     if (!authRecord) {
-      throw new BadRequestException('유효하지 않은 인증 코드입니다.');
+      throw new HttpException(
+        { message: '유효하지 않은 인증 코드입니다.' },
+        HttpStatus.BAD_REQUEST, // 400 상태 코드
+      );
     }
   
     if (authRecord.expiresAt < new Date()) {
-      throw new BadRequestException('인증 코드가 만료되었습니다.');
+      throw new HttpException(
+        { message: '인증 코드가 만료되었습니다.' },
+        HttpStatus.UNAUTHORIZED, // 401 상태 코드
+      );
     }
   
     // 인증 코드 상태를 사용 완료로 업데이트
@@ -74,7 +80,3 @@ export class AuthenticodeService {
     return { message: '인증 코드가 확인되었습니다.' };
   }
 }
-
-
-  
-
