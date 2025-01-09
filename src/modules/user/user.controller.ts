@@ -172,7 +172,7 @@ export class UserController {
     }
   }
 
-  @Get('my-page/applications')
+  @Get('me/applications')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '마이페이지 지원 정보 조회',
