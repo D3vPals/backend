@@ -145,6 +145,7 @@ export class ProjectController {
     return await this.projectService.fetchProjectCount();
   }
 
+  // GET: 본인이 등록한 공고 목록
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '기획자가 등록한 공고 목록',
