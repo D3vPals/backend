@@ -138,7 +138,7 @@ export class EmailService {
             });
 
           // 병렬로 처리
-          await Promise.all([
+          await Promise.allSettled([
             modifyRejectPromise,
             sendAcceptedEmailsPromise,
             sendRejectedEmailsPromise,
