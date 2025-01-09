@@ -15,13 +15,16 @@ import {
  import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
+import { CurrentUser } from '../../decorators/curretUser.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CheckNicknameDto } from './dto/check-nickname.dto';
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+  ) {}
 
   @Post('nickname-check')
   @HttpCode(HttpStatus.CREATED)
@@ -44,6 +47,17 @@ export class UserController {
     schema: {
       example: {
         message: ['닉네임은 반드시 입력해야 합니다.'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: '닉네임 중복',
+    schema: {
+      example: {
+        message: '이미 사용 중인 닉네임입니다.',
         error: 'Bad Request',
         statusCode: 400,
       },
@@ -122,33 +136,31 @@ export class UserController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   async patchUpdateProfileImage(
-    @Req() req,
-    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() userId: number, // 사용자 ID 가져오기 (req.user 대체)
+    @UploadedFile() file: Express.Multer.File, // 업로드된 파일 가져오기
   ) {
-    console.log('req.user:', req.user); // 디버깅: req.user 확인
-    const userId = req.user.userId; // userId 가져오기
-  
     if (!userId) {
       throw new BadRequestException('사용자 ID를 확인할 수 없습니다.');
     }
-  
+
     if (!file) {
       throw new BadRequestException('파일이 업로드되지 않았습니다.');
     }
-  
-    const fileType = file.mimetype.split('/')[1];
+
+    const fileType = file.mimetype.split('/')[1]; // 파일 확장자 추출
     const allowedFileTypes = ['jpeg', 'png', 'jpg'];
     if (!allowedFileTypes.includes(fileType)) {
       throw new BadRequestException('허용되지 않는 파일 형식입니다.');
     }
-  
+
     try {
+      // 사용자 프로필 업데이트
       const updatedUser = await this.userService.updateProfileImage(
-        userId, // userId 전달
+        userId,
         file.buffer,
         fileType,
       );
-  
+
       return {
         message: '프로필 이미지가 성공적으로 업데이트되었습니다.',
         user: updatedUser,
