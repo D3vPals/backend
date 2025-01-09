@@ -82,7 +82,7 @@ export class EmailService {
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT) // 매일 자정 실행
+  @Cron('0 0 * * *', { timeZone: 'Asia/Seoul' }) // 매일 자정 실행
   async updateProjectsToDone() {
     const today = new Date();
 
@@ -138,7 +138,7 @@ export class EmailService {
             });
 
           // 병렬로 처리
-          await Promise.all([
+          await Promise.allSettled([
             modifyRejectPromise,
             sendAcceptedEmailsPromise,
             sendRejectedEmailsPromise,

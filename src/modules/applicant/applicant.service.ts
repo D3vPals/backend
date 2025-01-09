@@ -109,7 +109,7 @@ export class ApplicantService {
   }) {
     const project = await this.projectService.fetchProject({ id: projectId });
     if (project.authorId !== authorId) {
-      throw new ForbiddenException('기획자만 조회 가능합니다.');
+      throw new ForbiddenException('해당 공고의 기획자만 조회 가능합니다.');
     }
 
     return await this.prisma.applicant.findMany({
@@ -151,5 +151,24 @@ export class ApplicantService {
       where: { projectId, status: 'WAITING' },
       data: { status },
     });
+  }
+
+  async fetchApplicantByStatus({
+    projectId,
+    authorId,
+  }: {
+    projectId: number;
+    authorId: number;
+  }) {
+    const allApplicant = await this.fetchManyApplicant({
+      projectId,
+      authorId,
+    });
+
+    // 상태별 필터링
+    const accepted = allApplicant.filter((a) => a.status === 'ACCEPTED');
+    const rejected = allApplicant.filter((a) => a.status === 'REJECTED');
+
+    return { accepted, rejected };
   }
 }

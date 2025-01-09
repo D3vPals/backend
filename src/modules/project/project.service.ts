@@ -192,6 +192,21 @@ export class ProjectService {
       positionTagId,
     } = data;
 
+    // 진행 방식 검증
+    await this.methodService.fetchMethod({ id: methodId });
+
+    // 스킬 태그 검증
+    const skillTags = await Promise.all(
+      skillTagId.map((id) => this.skillTagService.fetchSkillTag({ id })),
+    );
+
+    // 포지션 태그 검증
+    const positionTags = await Promise.all(
+      positionTagId.map((id) =>
+        this.positionTagService.fetchPositionTag({ id }),
+      ),
+    );
+
     const createdProject = await this.prismaService.project.create({
       data: {
         title,
@@ -207,19 +222,17 @@ export class ProjectService {
       },
     });
 
-    // projectSkillTag 생성
     await this.prismaService.projectSkillTag.createMany({
-      data: skillTagId.map((tagId) => ({
+      data: skillTags.map((tag) => ({
         projectId: createdProject.id,
-        skillTagId: tagId,
+        skillTagId: tag.id,
       })),
     });
 
-    // projectPositionTag 생성
     await this.prismaService.projectPositionTag.createMany({
-      data: positionTagId.map((tagId) => ({
+      data: positionTags.map((tag) => ({
         projectId: createdProject.id,
-        positionTagId: tagId,
+        positionTagId: tag.id,
       })),
     });
 
@@ -332,7 +345,7 @@ export class ProjectService {
   }) {
     const project = await this.fetchProject({ id });
     if (project.authorId !== authorId) {
-      throw new ForbiddenException('기획자만 마감할 수 있습니다.');
+      throw new ForbiddenException('기획자만 모집을 종료할 수 있습니다.');
     }
 
     try {
