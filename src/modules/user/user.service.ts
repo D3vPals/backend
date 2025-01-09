@@ -124,9 +124,9 @@ export class UserService {
 
   async getUserInfoWithSkills(userId: number) {
     if (!userId || typeof userId !== 'number') {
-      throw new BadRequestException('잘못된 사용자 ID입니다.');
+      return null; // 사용자 ID가 잘못된 경우 null 반환
     }
-    // 사용자 기본 정보 가져오기
+  
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -137,17 +137,21 @@ export class UserService {
         profileImg: true,
         userLevel: true,
         github: true,
-        position: true,
         career: true,
+        positionTag: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         createdAt: true,
       },
     });
-
+  
     if (!user) {
-      throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
+      return null; // 사용자 정보가 없는 경우 null 반환
     }
-
-    // 사용자 스킬셋 가져오기
+  
     const userSkills = await this.prisma.userSkillTag.findMany({
       where: { userId },
       include: {
@@ -159,15 +163,24 @@ export class UserService {
         },
       },
     });
-
+  
     const skills = userSkills.map((userSkill) => ({
       skillName: userSkill.SkillTag.name,
       skillImg: userSkill.SkillTag.img,
     }));
-
+  
     return {
-      ...user,
+      id: user.id,
+      nickname: user.nickname,
+      email: user.email,
+      bio: user.bio,
+      profileImg: user.profileImg,
+      userLevel: user.userLevel,
+      github: user.github,
+      career: user.career,
+      positionTag: user.positionTag,
       skills,
+      createdAt: user.createdAt,
     };
   }
 
