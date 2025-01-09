@@ -642,7 +642,6 @@ export class ProjectController {
               },
               {},
             ],
-            {}
           },
         },
       ],
