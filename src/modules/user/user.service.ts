@@ -121,4 +121,54 @@ export class UserService {
       throw new InternalServerErrorException('지원한 프로젝트를 불러오는 중 오류가 발생했습니다.');
     }
   }
+
+  async getUserInfoWithSkills(userId: number) {
+    if (!userId || typeof userId !== 'number') {
+      throw new BadRequestException('잘못된 사용자 ID입니다.');
+    }
+    // 사용자 기본 정보 가져오기
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        nickname: true,
+        email: true,
+        bio: true,
+        profileImg: true,
+        userLevel: true,
+        github: true,
+        position: true,
+        career: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    // 사용자 스킬셋 가져오기
+    const userSkills = await this.prisma.userSkillTag.findMany({
+      where: { userId },
+      include: {
+        SkillTag: {
+          select: {
+            name: true,
+            img: true,
+          },
+        },
+      },
+    });
+
+    const skills = userSkills.map((userSkill) => ({
+      skillName: userSkill.SkillTag.name,
+      skillImg: userSkill.SkillTag.img,
+    }));
+
+    return {
+      ...user,
+      skills,
+    };
+  }
+
 }
