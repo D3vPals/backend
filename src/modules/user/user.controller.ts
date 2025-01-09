@@ -294,6 +294,8 @@ export class UserController {
       },
     },
   })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
   async getOtherUserInfo(@Param('id') id: number): Promise<MyInfoResponseDto> {
     return this.userService.getUserInfoWithSkills(id);
   }
