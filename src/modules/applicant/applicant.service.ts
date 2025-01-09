@@ -189,6 +189,11 @@ export class ApplicantService {
     if (project.authorId !== authorId) {
       throw new ForbiddenException('기획자만 수정 가능합니다.');
     }
+    if (project.isDone) {
+      throw new BadRequestException(
+        '마감한 공고는 지원자의 상태를 변경할 수 없습니다.',
+      );
+    }
 
     const applicant = await this.prisma.applicant.findFirst({
       where: { projectId, userId },

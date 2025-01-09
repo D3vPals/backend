@@ -845,6 +845,17 @@ export class ProjectController {
       },
     },
   })
+  @ApiResponse({
+    status: 400,
+    description: '모집 마감을 한 공고인 경우',
+    schema: {
+      example: {
+        message: '마감한 공고는 지원자의 상태를 변경할 수 없습니다.',
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+  })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Patch(':projectId/applicant/:applicantId/status')
