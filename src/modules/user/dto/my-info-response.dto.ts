@@ -8,6 +8,14 @@ class SkillDto {
   skillImg: string;
 }
 
+class PositionDto {
+  @ApiProperty({ description: '포지션 ID', example: 2 })
+  id: number;
+
+  @ApiProperty({ description: '포지션 이름', example: '프론트엔드' })
+  name: string;
+}
+
 export class MyInfoResponseDto {
   @ApiProperty({ description: '사용자 ID', example: 1 })
   id: number;
@@ -30,11 +38,15 @@ export class MyInfoResponseDto {
   @ApiProperty({ description: 'GitHub 링크', example: 'https://github.com/jennywithlove' })
   github: string;
 
-  @ApiProperty({ description: '사용자 포지션', example: '프론트엔드 개발자' })
-  position: string;
-
   @ApiProperty({ description: '사용자 경력', example: '2020.12.10 ~ 2022.02.04 OO기업 인턴' })
   career: string;
+
+  @ApiProperty({
+    description: '포지션 태그 정보',
+    type: PositionDto,
+    example: { id: 2, name: '프론트엔드' },
+  })
+  positionTag: PositionDto;
 
   @ApiProperty({
     description: '사용자의 스킬셋',
