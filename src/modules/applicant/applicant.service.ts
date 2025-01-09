@@ -109,7 +109,7 @@ export class ApplicantService {
   }) {
     const project = await this.projectService.fetchProject({ id: projectId });
     if (project.authorId !== authorId) {
-      throw new ForbiddenException('기획자만 조회 가능합니다.');
+      throw new ForbiddenException('해당 공고의 기획자만 조회 가능합니다.');
     }
 
     return await this.prisma.applicant.findMany({
