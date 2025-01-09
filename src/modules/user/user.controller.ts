@@ -8,7 +8,7 @@ import {
   Patch,
   UseInterceptors,
   UploadedFile,
-  Req,
+  Get,
   UseGuards,
   InternalServerErrorException 
  } from '@nestjs/common';
@@ -18,6 +18,7 @@ import { UserService } from './user.service';
 import { CurrentUser } from '../../decorators/curretUser.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CheckNicknameDto } from './dto/check-nickname.dto';
+import { ApplicationStatusDto } from './dto/application-status.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -170,5 +171,55 @@ export class UserController {
       throw new InternalServerErrorException('프로필 이미지 업데이트 중 오류가 발생했습니다.');
     }
   }
+
+  @Get('my-page/applications')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '마이 페이지 지원 정보 조회',
+    description: '사용자가 지원한 프로젝트 목록과 합격 여부를 반환합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용자의 지원한 프로젝트와 상태를 성공적으로 반환',
+    schema: {
+      example: [
+        {
+          projectTitle: "클론코딩 사이드 프로젝트 팀원 모집",
+          status: "ACCEPTED"
+        },
+        {
+          projectTitle: "클론코딩 모집",
+          status: "REJECTED"
+        },
+        {
+          projectTitle: "클론코딩 사이드 프로젝트 모집 공고",
+          status: "WAITING"
+        }
+      ]
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: '유효하지 않거나 만료된 토큰입니다.',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  async getApplications(@CurrentUser() userId: number): Promise<ApplicationStatusDto[]> {
+    if (!userId) {
+      throw new BadRequestException('사용자 ID를 확인할 수 없습니다.');
+    }
+  
+    const applications = await this.userService.getApplicationsByUserId(userId);
+  
+    return applications;
+  }
+
 
 }
