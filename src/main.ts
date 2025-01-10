@@ -5,7 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
-import { LoggingMiddleware } from '../src/modules/test/logging.middleware';
+import { LoggingMiddleware } from './modules/test/logging.middleware';
 import { config } from 'dotenv';
 config();
 
