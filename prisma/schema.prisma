@@ -115,7 +115,7 @@ model User {
   profileImg    String?        @db.Text
   userLevel     UserLevel      @default(Beginner)
   github        String?        @db.VarChar(255)
-  career        String?        @db.Text
+  career        Json?
   positionTagId Int?
   createdAt     DateTime       @default(now()) @db.Timestamp(0)
   updatedAt     DateTime       @default(now()) @db.Timestamp(0)
