@@ -9,18 +9,18 @@ datasource db {
 }
 
 model Applicant {
-  id          Int               @id @default(autoincrement())
-  userId      Int?
-  projectId   Int?
-  message     String?           @db.Text
-  email       String?           @db.VarChar(255)
-  phoneNumber String?           @db.VarChar(15)
-  career      String?           @db.Text
-  status      Applicant_status? @default(WAITING)
-  createdAt   DateTime?         @default(now()) @db.Timestamp(0)
-  updatedAt   DateTime?         @default(now()) @db.Timestamp(0)
-  User        User?             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Applicant_ibfk_1")
-  Project     Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Applicant_ibfk_2")
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  projectId   Int
+  message     String?          @db.Text
+  email       String?          @db.VarChar(255)
+  phoneNumber String?          @db.VarChar(15)
+  career      Json?
+  status      Applicant_status @default(WAITING)
+  createdAt   DateTime         @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime         @default(now()) @db.Timestamp(0)
+  User        User             @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Applicant_ibfk_1")
+  Project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Applicant_ibfk_2")
 
   @@index([projectId], map: "projectId")
   @@index([userId], map: "userId")
@@ -39,16 +39,16 @@ model Authenticode {
 model Method {
   id        Int       @id @default(autoincrement())
   name      String    @unique(map: "name") @db.VarChar(50)
-  createdAt DateTime? @default(now()) @db.Timestamp(0)
+  createdAt DateTime  @default(now()) @db.Timestamp(0)
   Project   Project[]
 }
 
 model Notification {
-  id        String    @id @db.Char(36)
+  id        String   @id @db.Char(36)
   userId    Int
-  content   String    @db.Text
-  createdAt DateTime? @default(now()) @db.Timestamp(0)
-  User      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Notification_ibfk_1")
+  content   String   @db.Text
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Notification_ibfk_1")
 
   @@index([userId], map: "userId")
 }
@@ -78,8 +78,8 @@ model Project {
   createdAt            DateTime             @default(now()) @db.Timestamp(0)
   updatedAt            DateTime             @default(now()) @db.Timestamp(0)
   Applicant            Applicant[]
-  User                 User?                @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_1")
-  Method               Method?              @relation(fields: [methodId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_3")
+  User                 User                 @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_1")
+  Method               Method               @relation(fields: [methodId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Project_ibfk_3")
   ProjectPositionTag   ProjectPositionTag[]
   ProjectSkillTag      ProjectSkillTag[]
 
@@ -100,8 +100,8 @@ model ProjectSkillTag {
 model SkillTag {
   id              Int               @id @default(autoincrement())
   name            String            @unique(map: "name") @db.VarChar(255)
-  img             String?           @db.Text
-  createdAt       DateTime?         @default(now()) @db.Timestamp(0)
+  img             String            @db.Text
+  createdAt       DateTime          @default(now()) @db.Timestamp(0)
   ProjectSkillTag ProjectSkillTag[]
   UserSkillTag    UserSkillTag[]
 }
@@ -113,12 +113,12 @@ model User {
   password      String         @db.VarChar(255)
   bio           String?        @db.Text
   profileImg    String?        @db.Text
-  userLevel     UserLevel?     @default(Beginner)
+  userLevel     UserLevel      @default(Beginner)
   github        String?        @db.VarChar(255)
   career        String?        @db.Text
-  createdAt     DateTime?      @default(now()) @db.Timestamp(0)
-  updatedAt     DateTime?      @default(now()) @db.Timestamp(0)
   positionTagId Int?
+  createdAt     DateTime       @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime       @default(now()) @db.Timestamp(0)
   Applicant     Applicant[]
   Notification  Notification[]
   Project       Project[]
@@ -130,11 +130,11 @@ model User {
 }
 
 model UserSkillTag {
-  userId           Int
-  skillTagId       Int
-  createdAt        DateTime?                      @default(now()) @db.Timestamp(0)
-  User             User                           @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "UserSkillTag_ibfk_1")
-  SkillTag         SkillTag                       @relation(fields: [skillTagId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "UserSkillTag_ibfk_2")
+  userId     Int
+  skillTagId Int
+  createdAt  DateTime  @default(now()) @db.Timestamp(0)
+  User       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "UserSkillTag_ibfk_1")
+  SkillTag   SkillTag  @relation(fields: [skillTagId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "UserSkillTag_ibfk_2")
 
   @@id([userId, skillTagId])
   @@index([skillTagId], map: "skillTagId")
@@ -152,11 +152,13 @@ model ProjectPositionTag {
 
 model Session {
   id           Int      @id @default(autoincrement())
-  userId       Int      @unique()
+  userId       Int      @unique
   accessToken  String
   refreshToken String
   expiresAt    DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 enum UserLevel {
