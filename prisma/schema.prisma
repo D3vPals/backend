@@ -13,8 +13,8 @@ model Applicant {
   userId      Int?
   projectId   Int?
   message     String?           @db.Text
-  email       String?           @db.VarChar(255) // 최대 255자로 설정
-  phoneNumber String?           @db.VarChar(15)  // 최대 15자로 설정 (국제 전화번호 기준)
+  email       String?           @db.VarChar(255)
+  phoneNumber String?           @db.VarChar(15)
   career      String?           @db.Text
   status      Applicant_status? @default(WAITING)
   createdAt   DateTime?         @default(now()) @db.Timestamp(0)
@@ -58,6 +58,7 @@ model PositionTag {
   name               String               @unique(map: "name") @db.VarChar(255)
   createdAt          DateTime?            @default(now()) @db.Timestamp(0)
   ProjectPositionTag ProjectPositionTag[]
+  User               User[]
 }
 
 model Project {
@@ -72,8 +73,8 @@ model Project {
   views                Int                  @default(0)
   isBeginner           Boolean              @default(false)
   isDone               Boolean              @default(false)
-  recruitmentEndDate   DateTime             @db.Date
   recruitmentStartDate DateTime             @db.Date
+  recruitmentEndDate   DateTime             @db.Date
   createdAt            DateTime             @default(now()) @db.Timestamp(0)
   updatedAt            DateTime             @default(now()) @db.Timestamp(0)
   Applicant            Applicant[]
@@ -106,20 +107,26 @@ model SkillTag {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  nickname     String         @unique(map: "nickname") @db.VarChar(255)
-  email        String         @unique(map: "email") @db.VarChar(255)
-  password     String         @db.VarChar(255)
-  bio          String?        @db.Text
-  profileImg   String?        @db.Text
-  userLevel    UserLevel?     @default(Beginner) // 유저별 등급 추가
-  createdAt    DateTime?      @default(now()) @db.Timestamp(0)
-  updatedAt    DateTime?      @default(now()) @db.Timestamp(0)
-  Applicant    Applicant[]
-  Notification Notification[]
-  Project      Project[]
-  sessions     Session[]
-  UserSkillTag UserSkillTag[]
+  id            Int            @id @default(autoincrement())
+  nickname      String         @unique(map: "nickname") @db.VarChar(255)
+  email         String         @unique(map: "email") @db.VarChar(255)
+  password      String         @db.VarChar(255)
+  bio           String?        @db.Text
+  profileImg    String?        @db.Text
+  userLevel     UserLevel?     @default(Beginner)
+  github        String?        @db.VarChar(255)
+  career        String?        @db.Text
+  createdAt     DateTime?      @default(now()) @db.Timestamp(0)
+  updatedAt     DateTime?      @default(now()) @db.Timestamp(0)
+  positionTagId Int?
+  Applicant     Applicant[]
+  Notification  Notification[]
+  Project       Project[]
+  sessions      Session?
+  positionTag   PositionTag?   @relation(fields: [positionTagId], references: [id])
+  UserSkillTag  UserSkillTag[]
+
+  @@index([positionTagId], map: "User_positionTagId_fkey")
 }
 
 model UserSkillTag {
