@@ -567,7 +567,14 @@ export class ProjectController {
         message: '기획자에게 하고 싶은 말',
         email: 'devpals@mail.com',
         phoneNumber: '010-0000-0000',
-        career: '경력 사항/ 수상 이력',
+        career: [
+          {
+            name: 'string',
+            periodStart: '2025-01-10',
+            periodEnd: '2025-01-10',
+            role: 'string',
+          },
+        ],
         status: 'WAITING',
         createdAt: '2025-01-09T00:34:03.000Z',
         updatedAt: '2025-01-09T00:34:03.000Z',

@@ -95,8 +95,17 @@ export class ApplicantService {
     data: CreateApplicantDTO;
   }) {
     await this.projectService.fetchProject({ id: projectId });
+    const { email, phoneNumber, career, message } = data;
+
     return await this.prisma.applicant.create({
-      data: { projectId, userId, ...data },
+      data: {
+        projectId,
+        userId,
+        email,
+        phoneNumber,
+        career: JSON.stringify(career),
+        message,
+      },
     });
   }
 
