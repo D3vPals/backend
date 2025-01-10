@@ -14,6 +14,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { MethodModule } from './modules/method/method.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TestModule } from './modules/test/test.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UploadModule,
     PrismaModule,
     MethodModule,
+    TestModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
