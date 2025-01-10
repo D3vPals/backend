@@ -121,4 +121,56 @@ export class UserService {
       throw new InternalServerErrorException('지원한 프로젝트를 불러오는 중 오류가 발생했습니다.');
     }
   }
+
+  async getUserInfoWithSkills(userId: number) {
+    if (!userId || typeof userId !== 'number') {
+      return null; // 사용자 ID가 잘못된 경우 null 반환
+    }
+  
+    // 사용자 정보와 스킬셋을 한 번에 가져오기
+    const userWithSkills = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        positionTag: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        UserSkillTag: {
+          include: {
+            SkillTag: {
+              select: {
+                name: true,
+                img: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  
+    if (!userWithSkills) {
+      return null; // 사용자 정보가 없는 경우 null 반환
+    }
+  
+    // 필요한 데이터만 반환 (가공 없이 Prisma 결과 그대로 매핑)
+    return {
+      id: userWithSkills.id,
+      nickname: userWithSkills.nickname,
+      email: userWithSkills.email,
+      bio: userWithSkills.bio,
+      profileImg: userWithSkills.profileImg,
+      userLevel: userWithSkills.userLevel,
+      github: userWithSkills.github,
+      career: userWithSkills.career,
+      positionTag: userWithSkills.positionTag,
+      skills: userWithSkills.UserSkillTag.map((userSkill) => ({
+        skillName: userSkill.SkillTag.name,
+        skillImg: userSkill.SkillTag.img,
+      })),
+      createdAt: userWithSkills.createdAt,
+    };
+  }
+
 }
