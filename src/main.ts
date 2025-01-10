@@ -1,13 +1,40 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import { Logger, LoggerService, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
 import { config } from 'dotenv';
 config();
 
+// 로그 디렉토리 및 파일 생성
+const logDir = '/var/log';
+const logFile = 'your-app.log';
+const logFilePath = path.join(logDir, logFile);
+
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true }); // 로그 디렉토리가 없으면 생성
+}
+
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const logger: LoggerService = new Logger();
+
+  // 기존 로거를 확장해 파일 로그 추가
+  logger.log = (message: string) => {
+    fs.appendFileSync(logFilePath, `[LOG] ${message}\n`);
+    console.log(message); // 콘솔에도 출력
+  };
+
+  logger.error = (message: string) => {
+    fs.appendFileSync(logFilePath, `[ERROR] ${message}\n`);
+    console.error(message);
+  };
+
+  app.useLogger(logger); // 앱에 커스터마이징된 로거 적용
 
   app.enableCors({
     origin: ['http://localhost:3000', `http://localhost:5173`], // 로컬 React 개발 서버 허용(기본 포트 적용 추후 수정 필요!)
