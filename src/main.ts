@@ -4,13 +4,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
 import { config } from 'dotenv';
-import { CustomLoggerService } from './modules/logger/logger.service';
 config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: new CustomLoggerService(),
-  });
+  const app = await NestFactory.create(AppModule);
 
   app.enableCors({
     origin: ['http://localhost:3000', `http://localhost:5173`], // 로컬 React 개발 서버 허용(기본 포트 적용 추후 수정 필요!)
