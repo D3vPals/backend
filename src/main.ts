@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import { LoggingMiddleware } from '../src/modules/test/logging.middleware';
 import { config } from 'dotenv';
 config();
 
@@ -20,6 +21,9 @@ if (!fs.existsSync(logDir)) {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // LoggingMiddleware를 전역 적용
+  app.use(new LoggingMiddleware().use);
 
   const logger: LoggerService = new Logger();
 
@@ -37,7 +41,7 @@ async function bootstrap() {
   app.useLogger(logger); // 앱에 커스터마이징된 로거 적용
 
   app.enableCors({
-    origin: ['http://localhost:3000', `http://localhost:5173`], // 로컬 React 개발 서버 허용(기본 포트 적용 추후 수정 필요!)
+    origin: ['http://localhost:3000', `http://localhost:5173`],
     credentials: true, // 인증 정보(쿠키 등) 허용
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
