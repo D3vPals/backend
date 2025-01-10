@@ -127,60 +127,49 @@ export class UserService {
       return null; // 사용자 ID가 잘못된 경우 null 반환
     }
   
-    const user = await this.prisma.user.findUnique({
+    // 사용자 정보와 스킬셋을 한 번에 가져오기
+    const userWithSkills = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        nickname: true,
-        email: true,
-        bio: true,
-        profileImg: true,
-        userLevel: true,
-        github: true,
-        career: true,
+      include: {
         positionTag: {
           select: {
             id: true,
             name: true,
           },
         },
-        createdAt: true,
-      },
-    });
-  
-    if (!user) {
-      return null; // 사용자 정보가 없는 경우 null 반환
-    }
-  
-    const userSkills = await this.prisma.userSkillTag.findMany({
-      where: { userId },
-      include: {
-        SkillTag: {
-          select: {
-            name: true,
-            img: true,
+        UserSkillTag: {
+          include: {
+            SkillTag: {
+              select: {
+                name: true,
+                img: true,
+              },
+            },
           },
         },
       },
     });
   
-    const skills = userSkills.map((userSkill) => ({
-      skillName: userSkill.SkillTag.name,
-      skillImg: userSkill.SkillTag.img,
-    }));
+    if (!userWithSkills) {
+      return null; // 사용자 정보가 없는 경우 null 반환
+    }
   
+    // 필요한 데이터만 반환 (가공 없이 Prisma 결과 그대로 매핑)
     return {
-      id: user.id,
-      nickname: user.nickname,
-      email: user.email,
-      bio: user.bio,
-      profileImg: user.profileImg,
-      userLevel: user.userLevel,
-      github: user.github,
-      career: user.career,
-      positionTag: user.positionTag,
-      skills,
-      createdAt: user.createdAt,
+      id: userWithSkills.id,
+      nickname: userWithSkills.nickname,
+      email: userWithSkills.email,
+      bio: userWithSkills.bio,
+      profileImg: userWithSkills.profileImg,
+      userLevel: userWithSkills.userLevel,
+      github: userWithSkills.github,
+      career: userWithSkills.career,
+      positionTag: userWithSkills.positionTag,
+      skills: userWithSkills.UserSkillTag.map((userSkill) => ({
+        skillName: userSkill.SkillTag.name,
+        skillImg: userSkill.SkillTag.img,
+      })),
+      createdAt: userWithSkills.createdAt,
     };
   }
 
