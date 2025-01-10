@@ -1,4 +1,4 @@
-import { Module, Logger } from '@nestjs/common';
+import { Module, Logger, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -15,6 +15,7 @@ import { MethodModule } from './modules/method/method.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TestModule } from './modules/test/test.module';
+import { LoggingMiddleware } from './modules/test/logging.middleware';
 
 @Module({
   imports: [
@@ -38,4 +39,8 @@ import { TestModule } from './modules/test/test.module';
   controllers: [AppController],
   providers: [AppService, Logger],
 })
-export class AppModule {}
+export class AppModule {
+    configure(consumer: MiddlewareConsumer) {
+      consumer.apply(LoggingMiddleware).forRoutes('*'); // 모든 라우트에 미들웨어 적용
+    }
+}

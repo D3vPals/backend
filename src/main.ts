@@ -5,7 +5,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
-import { LoggingMiddleware } from './modules/test/logging.middleware';
 import { config } from 'dotenv';
 config();
 
@@ -21,9 +20,6 @@ if (!fs.existsSync(logDir)) {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  // LoggingMiddleware를 전역 적용
-  app.use(new LoggingMiddleware().use);
 
   const logger: LoggerService = new Logger();
 
