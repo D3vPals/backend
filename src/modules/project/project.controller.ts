@@ -865,17 +865,17 @@ export class ProjectController {
   })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  @Patch(':projectId/applicant/:applicantId/status')
+  @Patch(':projectId/applicant/:applicantUserId/status')
   async patchApplicantByStatus(
     @CurrentUser() userId: number,
     @Param('projectId', ParseIntPipe) projectId: number,
-    @Param('applicantId', ParseIntPipe) applicantId: number,
+    @Param('applicantUserId', ParseIntPipe) applicantUserId: number,
     @Body() { status }: ModifyApplicantStatusDTO,
   ) {
     return await this.applicantService.modifyApplicantStatus({
       authorId: userId,
       projectId,
-      userId: applicantId,
+      userId: applicantUserId,
       status,
     });
   }
