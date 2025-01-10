@@ -14,7 +14,6 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { MethodModule } from './modules/method/method.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { LoggerModule } from './modules/logger/logger.module';
 
 @Module({
   imports: [
@@ -33,7 +32,6 @@ import { LoggerModule } from './modules/logger/logger.module';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
-    LoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
