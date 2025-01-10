@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UploadService } from '../upload/upload.service';
 import { ApplicationStatusDto } from './dto/application-status.dto';
+import { CareerDto } from './dto/my-info-response.dto'
 
 @Injectable()
 export class UserService {
@@ -121,4 +122,60 @@ export class UserService {
       throw new InternalServerErrorException('지원한 프로젝트를 불러오는 중 오류가 발생했습니다.');
     }
   }
+
+  async getUserInfoWithSkills(userId: number) {
+    if (!userId || typeof userId !== 'number') {
+      return null; // 사용자 ID가 잘못된 경우 null 반환
+    }
+  
+    const userWithSkills = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        positionTag: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        UserSkillTag: {
+          include: {
+            SkillTag: {
+              select: {
+                name: true,
+                img: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  
+    if (!userWithSkills) {
+      return null; // 사용자 정보가 없는 경우 null 반환
+    }
+  
+    // `career` 필드를 안전하게 파싱
+    const parsedCareer: CareerDto[] = userWithSkills.career
+  ? (userWithSkills.career as any as CareerDto[]) // 타입 단언 사용
+  : [];
+
+  
+    return {
+      id: userWithSkills.id,
+      nickname: userWithSkills.nickname,
+      email: userWithSkills.email,
+      bio: userWithSkills.bio,
+      profileImg: userWithSkills.profileImg,
+      userLevel: userWithSkills.userLevel,
+      github: userWithSkills.github,
+      career: parsedCareer, // 파싱된 JSON 데이터 반환
+      positionTag: userWithSkills.positionTag,
+      skills: userWithSkills.UserSkillTag.map((userSkill) => ({
+        skillName: userSkill.SkillTag.name,
+        skillImg: userSkill.SkillTag.img,
+      })),
+      createdAt: userWithSkills.createdAt,
+    };
+  }
+
 }
