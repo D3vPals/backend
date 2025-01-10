@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UploadService } from '../upload/upload.service';
 import { ApplicationStatusDto } from './dto/application-status.dto';
+import { CareerDto } from './dto/my-info-response.dto'
 
 @Injectable()
 export class UserService {
@@ -127,7 +128,6 @@ export class UserService {
       return null; // 사용자 ID가 잘못된 경우 null 반환
     }
   
-    // 사용자 정보와 스킬셋을 한 번에 가져오기
     const userWithSkills = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -154,7 +154,12 @@ export class UserService {
       return null; // 사용자 정보가 없는 경우 null 반환
     }
   
-    // 필요한 데이터만 반환 (가공 없이 Prisma 결과 그대로 매핑)
+    // `career` 필드를 안전하게 파싱
+    const parsedCareer: CareerDto[] = userWithSkills.career
+  ? (userWithSkills.career as any as CareerDto[]) // 타입 단언 사용
+  : [];
+
+  
     return {
       id: userWithSkills.id,
       nickname: userWithSkills.nickname,
@@ -163,7 +168,7 @@ export class UserService {
       profileImg: userWithSkills.profileImg,
       userLevel: userWithSkills.userLevel,
       github: userWithSkills.github,
-      career: userWithSkills.career,
+      career: parsedCareer, // 파싱된 JSON 데이터 반환
       positionTag: userWithSkills.positionTag,
       skills: userWithSkills.UserSkillTag.map((userSkill) => ({
         skillName: userSkill.SkillTag.name,
