@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UploadService } from '../upload/upload.service';
 import { SkillTagService } from '../skill-tag/skill-tag.service';
+import { PositionTagService } from '../position-tag/position-tag.service';
 import { ApplicationStatusDto } from './dto/application-status.dto';
 import { CareerDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,7 +16,7 @@ export class UserService {
     private readonly prisma: PrismaService,
     private s3Service: UploadService,
     private skillTagService : SkillTagService,
-    private positionTagService : SkillTagService,
+    private positionTagService : PositionTagService,
   ) {}
 
   async checkNicknameAvailability(nickname: string): Promise<boolean> {
