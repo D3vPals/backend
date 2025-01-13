@@ -338,8 +338,6 @@ export class UserController {
 
   @Put('me')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT')
   @ApiOperation({
     summary: '내 정보 수정',
     description: '사용자의 정보를 수정합니다.',
@@ -371,6 +369,8 @@ export class UserController {
       },
     },
   })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
   async putUpdateMe(
     @CurrentUser() userId: number,
     @Body() updateUserDto: UpdateUserDto,
