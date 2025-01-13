@@ -65,7 +65,18 @@ export class MyInfoResponseDto {
   @ApiProperty({ description: 'GitHub 링크', example: 'https://github.com/jennywithlove' })
   github: string;
 
-  @ApiProperty({ description: '사용자 경력', type: [CareerDto] })
+  @ApiProperty({ 
+    description: '사용자 경력', 
+    type: [CareerDto],
+    example: [
+      {
+        name: 'Google',
+        periodStart: '2020-01-01',
+        periodEnd: '2022-01-01',
+        role: 'Software Engineer',
+      },
+    ],
+  })
   career: CareerDto[]; // JSON 필드 반영
 
   @ApiProperty({
