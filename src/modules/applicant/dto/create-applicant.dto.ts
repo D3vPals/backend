@@ -1,15 +1,30 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
-  IsArray,
-  IsDataURI,
-  IsDate,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
+
+class CareerDto {
+  @IsString()
+  @IsOptional()
+  name: string;
+
+  @Type(() => Date)
+  @IsOptional()
+  periodStart: Date;
+
+  @Type(() => Date)
+  @IsOptional()
+  periodEnd: Date;
+
+  @IsString()
+  @IsOptional()
+  role: string;
+}
 
 export class CreateApplicantDTO {
   @ApiProperty({
@@ -38,27 +53,11 @@ export class CreateApplicantDTO {
 
   @ApiProperty({
     description: '경력사항/수상이력',
+    type: [CareerDto],
+    required: false,
   })
-  @IsArray()
   @ValidateNested({ each: true })
+  @IsOptional()
   @Type(() => CareerDto)
-  career?: CareerDto[];
-}
-
-class CareerDto {
-  @IsString()
-  @IsOptional()
-  name: string;
-
-  @Type(() => Date)
-  @IsOptional()
-  periodStart: string;
-
-  @Type(() => Date)
-  @IsOptional()
-  periodEnd: string;
-
-  @IsString()
-  @IsOptional()
-  role: string;
+  career?: CareerDto[] | null;
 }
