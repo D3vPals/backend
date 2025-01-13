@@ -19,4 +19,15 @@ export class SkillTagService {
 
     return skillTag;
   }
+
+  async fetchPositionTag({ id }: { id: number }) {
+    const positionTag = await this.prismaService.positionTag.findUnique({
+      where: { id },
+    });
+    if (!positionTag) {
+      throw new NotFoundException('해당 포지션 태그가 존재하지 않습니다.');
+    }
+
+    return positionTag;
+  }
 }
