@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Get,
+  Put,
   Param,
   UseGuards,
   InternalServerErrorException 
@@ -23,6 +24,7 @@ import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { CheckNicknameDto } from './dto/check-nickname.dto';
 import { ApplicationStatusDto } from './dto/application-status.dto';
 import { MyInfoResponseDto } from './dto/my-info-response.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -222,106 +224,160 @@ export class UserController {
     return applications;
   }
 
-// 내 정보 조회
-@Get('me')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({
-  summary: '내 정보 보기',
-  description: '인증된 사용자의 정보를 반환하며, 포지션, 깃허브 링크, 경력, 스킬셋 등을 포함합니다.',
-})
-@ApiResponse({
-  status: 200,
-  description: '사용자의 정보 반환',
-  type: MyInfoResponseDto,
-})
-@ApiResponse({
-  status: 401,
-  description: '인증 실패',
-  schema: {
-    example: {
-      statusCode: 401,
-      message: '유효하지 않거나 만료된 토큰입니다.',
-      error: 'Unauthorized',
+  // 내 정보 조회
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '내 정보 보기',
+    description: '인증된 사용자의 정보를 반환하며, 포지션, 깃허브 링크, 경력, 스킬셋 등을 포함합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용자의 정보 반환',
+    type: MyInfoResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: '유효하지 않거나 만료된 토큰입니다.',
+        error: 'Unauthorized',
+      },
     },
-  },
-})
-@ApiResponse({
-  status: 404,
-  description: '사용자 정보가 존재하지 않을 경우',
-  schema: {
-    example: {
-      statusCode: 404,
-      message: '사용자 정보를 찾을 수 없습니다.',
-      error: 'Not Found',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 정보가 존재하지 않을 경우',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: '사용자 정보를 찾을 수 없습니다.',
+        error: 'Not Found',
+      },
     },
-  },
-})
-@ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard) // 401 에러 처리
-async getMyInfo(@CurrentUser() userId: number): Promise<MyInfoResponseDto> {
-  if (!userId) {
-    throw new UnauthorizedException('인증되지 않은 사용자입니다.');
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard) // 401 에러 처리
+  async getMyInfo(@CurrentUser() userId: number): Promise<MyInfoResponseDto> {
+    if (!userId) {
+      throw new UnauthorizedException('인증되지 않은 사용자입니다.');
+    }
+
+    const userInfo = await this.userService.getUserInfoWithSkills(userId);
+
+    if (!userInfo) {
+      throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    // career가 비어 있는 경우 빈 배열 반환
+    if (!userInfo.career || userInfo.career.length === 0) {
+    userInfo.career = [];
+    }
+
+    return userInfo;
   }
 
-  const userInfo = await this.userService.getUserInfoWithSkills(userId);
+  // 다른 사용자 정보 조회
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '다른 사용자 정보 보기',
+    description: '특정 사용자의 정보를 반환합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용자의 정보 반환',
+    type: MyInfoResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 요청 - 사용자 ID 형식이 잘못되었거나 누락됨',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: '잘못된 사용자 ID입니다.',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 정보가 존재하지 않을 경우',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: '사용자 정보를 찾을 수 없습니다.',
+        error: 'Not Found',
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  async getOtherUserInfo(@Param('id') id: string): Promise<MyInfoResponseDto> {
+    const userId = parseInt(id, 10); // 숫자로 변환
 
-  if (!userInfo) {
-    throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+    if (isNaN(userId)) {
+      throw new BadRequestException('잘못된 사용자 ID입니다.');
+    }
+
+    const userInfo = await this.userService.getUserInfoWithSkills(userId);
+
+    if (!userInfo) {
+      throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    // career가 비어 있는 경우 빈 배열 반환
+    if (!userInfo.career || userInfo.career.length === 0) {
+      userInfo.career = [];
+    }
+
+    return userInfo;
   }
 
-  return userInfo;
+  @Put('me')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({
+    summary: '내 정보 수정',
+    description: '사용자의 정보를 수정합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용자 정보가 성공적으로 수정되었습니다.',
+    type: MyInfoResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 요청 데이터 형식',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: '잘못된 데이터 형식입니다.',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: '유효하지 않거나 만료된 토큰입니다.',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  async putUpdateMe(
+    @CurrentUser() userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<MyInfoResponseDto> {
+    return await this.userService.updateUser(userId, updateUserDto);
+  }
+
+
 }
 
-// 다른 사용자 정보 조회
-@Get(':id')
-@HttpCode(HttpStatus.OK)
-@ApiOperation({
-  summary: '다른 사용자 정보 보기',
-  description: '특정 사용자의 정보를 반환합니다.',
-})
-@ApiResponse({
-  status: 200,
-  description: '사용자의 정보 반환',
-  type: MyInfoResponseDto,
-})
-@ApiResponse({
-  status: 400,
-  description: '잘못된 요청 - 사용자 ID 형식이 잘못되었거나 누락됨',
-  schema: {
-    example: {
-      statusCode: 400,
-      message: '잘못된 사용자 ID입니다.',
-      error: 'Bad Request',
-    },
-  },
-})
-@ApiResponse({
-  status: 404,
-  description: '사용자 정보가 존재하지 않을 경우',
-  schema: {
-    example: {
-      statusCode: 404,
-      message: '사용자 정보를 찾을 수 없습니다.',
-      error: 'Not Found',
-    },
-  },
-})
-@ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard)
-async getOtherUserInfo(@Param('id') id: string): Promise<MyInfoResponseDto> {
-  const userId = parseInt(id, 10); // 숫자로 변환
-
-  if (isNaN(userId)) {
-    throw new BadRequestException('잘못된 사용자 ID입니다.');
-  }
-
-  const userInfo = await this.userService.getUserInfoWithSkills(userId);
-
-  if (!userInfo) {
-    throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
-  }
-
-  return userInfo;
-}
-
-}
