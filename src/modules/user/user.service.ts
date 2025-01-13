@@ -254,4 +254,48 @@ export class UserService {
     return this.getUserInfoWithSkills(userId);
   }
 
+  async fetchManyAcceptedProjects(userId: number) {
+    const applicants = await this.prisma.applicant.findMany({
+      where: {
+        userId,
+        status: 'ACCEPTED',
+      },
+      include: {
+        Project: {
+          include: {
+            ProjectSkillTag: {
+              include: { SkillTag: true },
+            },
+            ProjectPositionTag: {
+              include: { PositionTag: true },
+            },
+          },
+        },
+      },
+    });
+  
+    // 필요한 정보만 가공
+    return applicants.map((applicant) => {
+      const project = applicant.Project;
+      return {
+        projectId: project.id,
+        title: project.title,
+        description: project.description,
+        startDate: project.startDate,
+        estimatedPeriod: project.estimatedPeriod,
+        isBeginner: project.isBeginner,
+        status: applicant.status, // ACCEPTED 상태만 포함
+        skills: project.ProjectSkillTag.map((tag) => ({
+          id: tag.SkillTag.id,
+          name: tag.SkillTag.name,
+          img: tag.SkillTag.img,
+        })),
+        positions: project.ProjectPositionTag.map((tag) => ({
+          id: tag.PositionTag.id,
+          name: tag.PositionTag.name,
+        })),
+      };
+    });
+  }
+
 }
