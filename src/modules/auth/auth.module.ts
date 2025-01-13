@@ -9,6 +9,8 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthenticodeModule } from '../authenticode/authenticode.module';
 import { UploadModule } from '../upload/upload.module';
+import { PositionTagModule } from '../position-tag/position-tag.module';
+import { SkillTagModule } from '../skill-tag/skill-tag.module'; 
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { UploadModule } from '../upload/upload.module';
     }),
     AuthenticodeModule,
     UploadModule,
+    PositionTagModule,
+    SkillTagModule
   ],
   controllers: [AuthController],
   providers: [

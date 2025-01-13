@@ -1,15 +1,23 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UploadService } from '../upload/upload.service';
+import { SkillTagService } from '../skill-tag/skill-tag.service';
+import { PositionTagService } from '../position-tag/position-tag.service';
 import { ApplicationStatusDto } from './dto/application-status.dto';
-import { CareerDto } from './dto/my-info-response.dto'
+import { CareerDto } from './dto/my-info-response.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { MyInfoResponseDto } from './dto/my-info-response.dto';
+
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private s3Service: UploadService,
+    private skillTagService : SkillTagService,
+    private positionTagService : PositionTagService,
   ) {}
 
   async checkNicknameAvailability(nickname: string): Promise<boolean> {
@@ -123,7 +131,7 @@ export class UserService {
     }
   }
 
-  async getUserInfoWithSkills(userId: number) {
+  async getUserInfoWithSkills(userId: number): Promise<MyInfoResponseDto | null> {
     if (!userId || typeof userId !== 'number') {
       return null; // 사용자 ID가 잘못된 경우 null 반환
     }
@@ -132,18 +140,12 @@ export class UserService {
       where: { id: userId },
       include: {
         positionTag: {
-          select: {
-            id: true,
-            name: true,
-          },
+          select: { id: true, name: true },
         },
         UserSkillTag: {
           include: {
             SkillTag: {
-              select: {
-                name: true,
-                img: true,
-              },
+              select: { name: true, img: true },
             },
           },
         },
@@ -154,12 +156,6 @@ export class UserService {
       return null; // 사용자 정보가 없는 경우 null 반환
     }
   
-    // `career` 필드를 안전하게 파싱
-    const parsedCareer: CareerDto[] = userWithSkills.career
-  ? (userWithSkills.career as any as CareerDto[]) // 타입 단언 사용
-  : [];
-
-  
     return {
       id: userWithSkills.id,
       nickname: userWithSkills.nickname,
@@ -168,7 +164,7 @@ export class UserService {
       profileImg: userWithSkills.profileImg,
       userLevel: userWithSkills.userLevel,
       github: userWithSkills.github,
-      career: parsedCareer, // 파싱된 JSON 데이터 반환
+      career: userWithSkills.career as unknown as CareerDto[], // 타입 캐스팅
       positionTag: userWithSkills.positionTag,
       skills: userWithSkills.UserSkillTag.map((userSkill) => ({
         skillName: userSkill.SkillTag.name,
@@ -176,6 +172,68 @@ export class UserService {
       })),
       createdAt: userWithSkills.createdAt,
     };
+  }
+
+  async updateUser(userId: number, updateUserDto: UpdateUserDto): Promise<MyInfoResponseDto> {
+    const { positionTagId, skillTagIds, career, ...updateData } = updateUserDto;
+  
+    // 유저 확인
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!existingUser) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+  
+    // 포지션 태그 검증 및 업데이트
+    if (positionTagId) {
+      // 포지션 태그 유효성 검증
+      const positionTag = await this.positionTagService.fetchPositionTag({ id: positionTagId });
+  
+      // 기존 포지션 태그 업데이트
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { positionTagId: positionTag.id },
+      });
+    }
+  
+    // 스킬 태그 삭제 후 추가
+    if (skillTagIds && skillTagIds.length > 0) {
+      // 스킬 태그 검증
+      const skillTags = await Promise.all(
+        skillTagIds.map((id) => this.skillTagService.fetchSkillTag({ id })),
+      );
+  
+      // 기존 스킬 태그 삭제
+      await this.prisma.userSkillTag.deleteMany({
+        where: { userId },
+      });
+  
+      // 새로운 스킬 태그 생성
+      await this.prisma.userSkillTag.createMany({
+        data: skillTags.map((tag) => ({
+          userId,
+          skillTagId: tag.id,
+        })),
+      });
+    }
+  
+    // `career` 필드 JSON으로 변환 및 Prisma InputJsonValue로 처리
+    const careerJson = career
+      ? (career as unknown as Prisma.InputJsonValue)
+      : null;
+  
+    // 사용자 정보 업데이트
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...updateData,
+        career: careerJson,
+      },
+    });
+  
+    // 업데이트된 데이터 가져오기
+    return this.getUserInfoWithSkills(userId);
   }
 
 }
