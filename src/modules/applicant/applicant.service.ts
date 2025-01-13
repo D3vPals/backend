@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { ProjectService } from '../project/project.service';
 import { CreateApplicantDTO } from './dto/create-applicant.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ApplicantService {
@@ -103,7 +104,7 @@ export class ApplicantService {
         userId,
         email,
         phoneNumber,
-        career: JSON.stringify(career),
+        career: career ? (career as unknown as Prisma.InputJsonValue) : null,
         message,
       },
     });

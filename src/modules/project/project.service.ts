@@ -99,11 +99,26 @@ export class ProjectService {
       orderBy: [{ createdAt: 'desc' }],
     });
 
+    const transformedProjects = projects.map((project) => ({
+      ...project,
+      ProjectSkillTag: project.ProjectSkillTag.map((tag) => ({
+        id: tag.SkillTag.id,
+        name: tag.SkillTag.name,
+        img: tag.SkillTag.img,
+        createdAt: tag.SkillTag.createdAt,
+      })),
+      ProjectPositionTag: project.ProjectPositionTag.map((tag) => ({
+        id: tag.PositionTag.id,
+        name: tag.PositionTag.name,
+        createdAt: tag.PositionTag.createdAt,
+      })),
+    }));
+
     const total = await this.prismaService.project.count({ where });
     const currentPage = dto.page;
     const lastPage = Math.ceil(total / PAGE_SIZE);
 
-    return { projects, total, currentPage, lastPage };
+    return { projects: transformedProjects, total, currentPage, lastPage };
   }
 
   // 진행중, 마감, 전체 공고 개수
@@ -168,7 +183,20 @@ export class ProjectService {
       throw new NotFoundException('해당 공고는 존재하지 않습니다.');
     }
 
-    return project;
+    return {
+      ...project,
+      skillTags: project.ProjectSkillTag.map((tag) => ({
+        id: tag.SkillTag.id,
+        name: tag.SkillTag.name,
+        img: tag.SkillTag.img,
+        createdAt: tag.SkillTag.createdAt,
+      })),
+      positionTags: project.ProjectPositionTag.map((tag) => ({
+        id: tag.PositionTag.id,
+        name: tag.PositionTag.name,
+        createdAt: tag.PositionTag.createdAt,
+      })),
+    };
   }
 
   async createProject({
