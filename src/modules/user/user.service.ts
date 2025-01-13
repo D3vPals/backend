@@ -199,12 +199,7 @@ export class UserService {
       // 포지션 태그 유효성 검증
       const positionTag = await this.positionTagService.fetchPositionTag({ id: positionTagId });
   
-      // 기존 포지션 태그 삭제 후 업데이트
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { positionTagId: null },
-      });
-  
+      // 기존 포지션 태그 업데이트
       await this.prisma.user.update({
         where: { id: userId },
         data: { positionTagId: positionTag.id },
