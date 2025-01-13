@@ -75,6 +75,12 @@ export class MyInfoResponseDto {
         periodEnd: '2022-01-01',
         role: 'Software Engineer',
       },
+      {
+        name: 'Facebook',
+        periodStart: '2018-06-01',
+        periodEnd: '2019-12-31',
+        role: 'Backend Developer',
+      },
     ],
   })
   career: CareerDto[]; // JSON 필드 반영
@@ -91,6 +97,7 @@ export class MyInfoResponseDto {
     type: [SkillDto],
     example: [
       { skillName: 'JavaScript', skillImg: 'https://example.com/js-logo.png' },
+      { skillName: 'TypeScript', skillImg: 'https://example.com/TypeScript-logo.png' },
       { skillName: 'React', skillImg: 'https://example.com/react-logo.png' },
     ],
   })
