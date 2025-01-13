@@ -25,6 +25,7 @@ import { CheckNicknameDto } from './dto/check-nickname.dto';
 import { ApplicationStatusDto } from './dto/application-status.dto';
 import { MyInfoResponseDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { GetAcceptedProjectsDto } from './dto/get-accepted-projects.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -378,6 +379,114 @@ export class UserController {
     return await this.userService.updateUser(userId, updateUserDto);
   }
 
+  
+  @Get('me/project')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '참여 프로젝트 조회 (내 프로젝트)',
+    description: '현재 인증된 사용자가 참여한 프로젝트 목록을 반환합니다. "합격된" 프로젝트만 포함됩니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '사용자가 참여한 프로젝트 목록',
+    schema: {
+      example: [
+        {
+          projectId: 1,
+          title: '클론코딩 사이드 프로젝트 모집',
+          description: '백엔드와 프론트엔드 협업 프로젝트',
+          startDate: '2025-01-01T00:00:00.000Z',
+          estimatedPeriod: '3개월',
+          isBeginner: true,
+          skills: ['JavaScript', 'TypeScript'],
+          positions: ['백엔드', '프론트엔드'],
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: '유효하지 않거나 만료된 토큰입니다.',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  async getManyMyAcceptedProjects(@CurrentUser() userId: number) {
+    return await this.userService.fetchManyAcceptedProjects(userId);
+  }
+
+  @Get(':id/project')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '참여 프로젝트 조회 (특정 사용자)',
+    description:
+      '특정 사용자가 참여한 프로젝트 목록을 반환합니다. 경로 파라미터로 사용자 ID를 전달해야 하며, "합격된" 프로젝트만 포함됩니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '특정 사용자가 참여한 프로젝트 목록',
+    schema: {
+      example: [
+        {
+          projectId: 1,
+          title: '클론코딩 사이드 프로젝트 모집',
+          description: '백엔드와 프론트엔드 협업 프로젝트',
+          startDate: '2025-01-01T00:00:00.000Z',
+          estimatedPeriod: '3개월',
+          isBeginner: true,
+          skills: ['JavaScript', 'TypeScript'],
+          positions: ['백엔드', '프론트엔드'],
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 사용자 ID 요청',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: '잘못된 사용자 ID입니다.',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증 실패',
+    schema: {
+      example: {
+        statusCode: 401,
+        message: '유효하지 않거나 만료된 토큰입니다.',
+        error: 'Unauthorized',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '사용자 정보를 찾을 수 없음',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: '사용자를 찾을 수 없습니다.',
+        error: 'Not Found',
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  async getManyUserAcceptedProjects(@Param() params: GetAcceptedProjectsDto) {
+    const { userId } = params;
+    return await this.userService.fetchManyAcceptedProjects(userId);
+  }
+
 
 }
+
 
