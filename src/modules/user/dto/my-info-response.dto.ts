@@ -2,7 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsOptional,
-  IsString
+  IsString,
+  ValidateNested
 } from 'class-validator';
 
 class SkillDto {
@@ -30,12 +31,12 @@ export class CareerDto {
   @ApiProperty({ description: '시작 날짜', example: '2020-01-01' })
   @Type(() => Date)
   @IsOptional()
-  periodStart: string;
+  periodStart: Date;
 
   @ApiProperty({ description: '종료 날짜', example: '2022-01-01' })
   @Type(() => Date)
   @IsOptional()
-  periodEnd: string;
+  periodEnd: Date;
 
   @ApiProperty({ description: '역할/포지션', example: 'Software Engineer' })
   @IsString()
@@ -65,8 +66,9 @@ export class MyInfoResponseDto {
   @ApiProperty({ description: 'GitHub 링크', example: 'https://github.com/jennywithlove' })
   github: string;
 
-  @ApiProperty({ 
-    description: '사용자 경력', 
+
+  @ApiProperty({
+    description: '경력사항/수상이력',
     type: [CareerDto],
     example: [
       {
@@ -83,7 +85,10 @@ export class MyInfoResponseDto {
       },
     ],
   })
-  career: CareerDto[]; // JSON 필드 반영
+  @ValidateNested({ each: true })
+  @IsOptional()
+  @Type(() => CareerDto)
+  career?: CareerDto[] | null;
 
   @ApiProperty({
     description: '포지션 태그 정보',
