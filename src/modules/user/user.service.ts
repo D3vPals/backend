@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UploadService } from '../upload/upload.service';
@@ -155,16 +156,6 @@ export class UserService {
       return null; // 사용자 정보가 없는 경우 null 반환
     }
   
-    // `career` 필드 파싱
-    let parsedCareer: CareerDto[] = [];
-    try {
-      const careerData = userWithSkills.career as unknown as string; // 문자열로 변환
-      parsedCareer = careerData ? JSON.parse(careerData) : []; // JSON 파싱
-    } catch (error) {
-      console.error('Error parsing career field:', error);
-    }
-  
-    
     return {
       id: userWithSkills.id,
       nickname: userWithSkills.nickname,
@@ -173,7 +164,7 @@ export class UserService {
       profileImg: userWithSkills.profileImg,
       userLevel: userWithSkills.userLevel,
       github: userWithSkills.github,
-      career: parsedCareer, // 파싱된 JSON 데이터 반환
+      career: userWithSkills.career as unknown as CareerDto[], // 타입 캐스팅
       positionTag: userWithSkills.positionTag,
       skills: userWithSkills.UserSkillTag.map((userSkill) => ({
         skillName: userSkill.SkillTag.name,
@@ -227,15 +218,10 @@ export class UserService {
       });
     }
   
-    // `career` 필드 JSON으로 변환
-    let careerJson = null;
-    if (career) {
-      try {
-        careerJson = JSON.stringify(career);
-      } catch (error) {
-        throw new BadRequestException('잘못된 career 데이터 형식입니다.');
-      }
-    }
+    // `career` 필드 JSON으로 변환 및 Prisma InputJsonValue로 처리
+    const careerJson = career
+      ? (career as unknown as Prisma.InputJsonValue)
+      : null;
   
     // 사용자 정보 업데이트
     await this.prisma.user.update({
