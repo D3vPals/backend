@@ -101,13 +101,13 @@ export class ProjectService {
 
     const transformedProjects = projects.map((project) => ({
       ...project,
-      ProjectSkillTag: project.ProjectSkillTag.map((tag) => ({
+      skillTags: project.ProjectSkillTag.map((tag) => ({
         id: tag.SkillTag.id,
         name: tag.SkillTag.name,
         img: tag.SkillTag.img,
         createdAt: tag.SkillTag.createdAt,
       })),
-      ProjectPositionTag: project.ProjectPositionTag.map((tag) => ({
+      positionTags: project.ProjectPositionTag.map((tag) => ({
         id: tag.PositionTag.id,
         name: tag.PositionTag.name,
         createdAt: tag.PositionTag.createdAt,
