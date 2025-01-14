@@ -268,8 +268,9 @@ export class UserService {
         totalMember: project.totalMember,
         startDate: project.startDate.toISOString(),
         estimatedPeriod: project.estimatedPeriod,
-        isBeginner: project.isBeginner,
         methodId: project.methodId,
+        isBeginner: project.isBeginner,
+        isDone : project.isDone,
         recruitmentStartDate: project.recruitmentStartDate.toISOString(),
         recruitmentEndDate: project.recruitmentEndDate.toISOString(),
         status: 'ACCEPTED', // 항상 ACCEPTED 상태 유지
