@@ -1,8 +1,10 @@
 import { Injectable, BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UploadService } from '../upload/upload.service';
 import { SkillTagService } from '../skill-tag/skill-tag.service';
+import { PositionTagService } from '../position-tag/position-tag.service';
 import { ApplicationStatusDto } from './dto/application-status.dto';
 import { CareerDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -16,7 +18,7 @@ export class UserService {
     private readonly prisma: PrismaService,
     private s3Service: UploadService,
     private skillTagService : SkillTagService,
-    private positionTagService : SkillTagService,
+    private positionTagService : PositionTagService,
   ) {}
 
   async checkNicknameAvailability(nickname: string): Promise<boolean> {
@@ -155,16 +157,6 @@ export class UserService {
       return null; // 사용자 정보가 없는 경우 null 반환
     }
   
-    // `career` 필드 파싱
-    let parsedCareer: CareerDto[] = [];
-    try {
-      const careerData = userWithSkills.career as unknown as string; // 문자열로 변환
-      parsedCareer = careerData ? JSON.parse(careerData) : []; // JSON 파싱
-    } catch (error) {
-      console.error('Error parsing career field:', error);
-    }
-  
-    
     return {
       id: userWithSkills.id,
       nickname: userWithSkills.nickname,
@@ -173,7 +165,7 @@ export class UserService {
       profileImg: userWithSkills.profileImg,
       userLevel: userWithSkills.userLevel,
       github: userWithSkills.github,
-      career: parsedCareer, // 파싱된 JSON 데이터 반환
+      career: userWithSkills.career as unknown as CareerDto[], // 타입 캐스팅
       positionTag: userWithSkills.positionTag,
       skills: userWithSkills.UserSkillTag.map((userSkill) => ({
         skillName: userSkill.SkillTag.name,
@@ -199,12 +191,7 @@ export class UserService {
       // 포지션 태그 유효성 검증
       const positionTag = await this.positionTagService.fetchPositionTag({ id: positionTagId });
   
-      // 기존 포지션 태그 삭제 후 업데이트
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { positionTagId: null },
-      });
-  
+      // 기존 포지션 태그 업데이트
       await this.prisma.user.update({
         where: { id: userId },
         data: { positionTagId: positionTag.id },
@@ -232,15 +219,10 @@ export class UserService {
       });
     }
   
-    // `career` 필드 JSON으로 변환
-    let careerJson = null;
-    if (career) {
-      try {
-        careerJson = JSON.stringify(career);
-      } catch (error) {
-        throw new BadRequestException('잘못된 career 데이터 형식입니다.');
-      }
-    }
+    // `career` 필드 JSON으로 변환 및 Prisma InputJsonValue로 처리
+    const careerJson = career
+      ? (career as unknown as Prisma.InputJsonValue)
+      : null;
   
     // 사용자 정보 업데이트
     await this.prisma.user.update({
