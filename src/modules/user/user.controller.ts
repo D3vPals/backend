@@ -26,6 +26,7 @@ import { ApplicationStatusDto } from './dto/application-status.dto';
 import { MyInfoResponseDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GetAcceptedProjectsDto } from './dto/get-accepted-projects.dto';
+import { ProjectResponseDto } from './dto/project-response.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -389,20 +390,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '사용자가 참여한 프로젝트 목록',
-    schema: {
-      example: [
-        {
-          projectId: 1,
-          title: '클론코딩 사이드 프로젝트 모집',
-          description: '백엔드와 프론트엔드 협업 프로젝트',
-          startDate: '2025-01-01T00:00:00.000Z',
-          estimatedPeriod: '3개월',
-          isBeginner: true,
-          skills: ['JavaScript', 'TypeScript'],
-          positions: ['백엔드', '프론트엔드'],
-        },
-      ],
-    },
+    type: [ProjectResponseDto],
   })
   @ApiResponse({
     status: 401,
@@ -431,20 +419,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: '특정 사용자가 참여한 프로젝트 목록',
-    schema: {
-      example: [
-        {
-          projectId: 1,
-          title: '클론코딩 사이드 프로젝트 모집',
-          description: '백엔드와 프론트엔드 협업 프로젝트',
-          startDate: '2025-01-01T00:00:00.000Z',
-          estimatedPeriod: '3개월',
-          isBeginner: true,
-          skills: ['JavaScript', 'TypeScript'],
-          positions: ['백엔드', '프론트엔드'],
-        },
-      ],
-    },
+    type: [ProjectResponseDto],
   })
   @ApiResponse({
     status: 400,
