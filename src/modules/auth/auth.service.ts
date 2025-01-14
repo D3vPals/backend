@@ -99,7 +99,7 @@ export class AuthService {
     // 3. 액세스 토큰 생성
     const accessToken = this.jwtService.sign(
       { sub: user.id, email: user.email },
-      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1m' },
+      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1h' },
     );
 
     // 4. 리프레시 토큰 생성 (해싱하지 않고 원본 그대로 저장)
@@ -166,7 +166,7 @@ export class AuthService {
       // 새로운 액세스 토큰 생성
       const newAccessToken = this.jwtService.sign(
         { sub: payload.sub, email: payload.email },
-        { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1m' },
+        { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1h' },
       );
 
       // 새로운 리프레시 토큰 생성
