@@ -9,16 +9,20 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthenticodeModule } from '../authenticode/authenticode.module';
 import { UploadModule } from '../upload/upload.module';
+import { PositionTagModule } from '../position-tag/position-tag.module';
+import { SkillTagModule } from '../skill-tag/skill-tag.module'; 
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET, // 환경 변수로 관리
-      signOptions: { expiresIn: '1h' }, // 기본 설정
+      signOptions: { expiresIn: '1m' }, // 기본 설정
     }),
     AuthenticodeModule,
     UploadModule,
+    PositionTagModule,
+    SkillTagModule
   ],
   controllers: [AuthController],
   providers: [
