@@ -265,6 +265,7 @@ export class UserService {
         projectId: project.id,
         title: project.title,
         description: project.description,
+        totalMember: project.totalMember,
         startDate: project.startDate.toISOString(),
         estimatedPeriod: project.estimatedPeriod,
         isBeginner: project.isBeginner,

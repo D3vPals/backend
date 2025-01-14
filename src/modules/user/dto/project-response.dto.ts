@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
 
 
 export class SkillTagDto {
@@ -54,6 +52,12 @@ export class ProjectResponseDto {
 
   @ApiProperty({ description: '프로젝트 설명', example: 'string' })
   description: string;
+
+  @ApiProperty({
+    example: 3,
+    description: '모집 인원',
+  })
+  totalMember: number;
 
   @ApiProperty({ description: '프로젝트 시작 날짜', example: '2025-01-25T00:00:00.000Z' })
   startDate: string;
