@@ -9,6 +9,7 @@ import { ApplicationStatusDto } from './dto/application-status.dto';
 import { CareerDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { MyInfoResponseDto } from './dto/my-info-response.dto';
+import { ProjectResponseDto } from './dto/project-response.dto';
 
 
 @Injectable()
@@ -235,5 +236,64 @@ export class UserService {
     // 업데이트된 데이터 가져오기
     return this.getUserInfoWithSkills(userId);
   }
+
+  async fetchManyAcceptedProjects(userId: number): Promise<ProjectResponseDto[]> {
+    const applicants = await this.prisma.applicant.findMany({
+      where: {
+        userId,
+        status: 'ACCEPTED', // 필터링
+      },
+      include: {
+        Project: {
+          include: {
+            ProjectSkillTag: {
+              include: { SkillTag: true },
+            },
+            ProjectPositionTag: {
+              include: { PositionTag: true },
+            },
+          },
+        },
+      },
+    });
+  
+    // 필요한 데이터만 가공하여 반환
+    return applicants.map((applicant) => {
+      const project = applicant.Project;
+  
+      return {
+        projectId: project.id,
+        title: project.title,
+        description: project.description,
+        totalMember: project.totalMember,
+        startDate: project.startDate.toISOString(),
+        estimatedPeriod: project.estimatedPeriod,
+        methodId: project.methodId,
+        isBeginner: project.isBeginner,
+        isDone : project.isDone,
+        recruitmentStartDate: project.recruitmentStartDate.toISOString(),
+        recruitmentEndDate: project.recruitmentEndDate.toISOString(),
+        status: 'ACCEPTED', // 항상 ACCEPTED 상태 유지
+        ProjectSkillTag: project.ProjectSkillTag.map((tag) => ({
+          projectId: tag.projectId,
+          skillTagId: tag.skillTagId,
+          SkillTag: {
+            id: tag.SkillTag.id,
+            name: tag.SkillTag.name,
+            img: tag.SkillTag.img,
+          },
+        })),
+        ProjectPositionTag: project.ProjectPositionTag.map((tag) => ({
+          projectId: tag.projectId,
+          positionTagId: tag.positionTagId,
+          PositionTag: {
+            id: tag.PositionTag.id,
+            name: tag.PositionTag.name,
+          },
+        })),
+      };
+    });
+  }
+
 
 }
