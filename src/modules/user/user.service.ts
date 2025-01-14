@@ -7,6 +7,7 @@ import { ApplicationStatusDto } from './dto/application-status.dto';
 import { CareerDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { MyInfoResponseDto } from './dto/my-info-response.dto';
+import { ProjectResponseDto } from './dto/project-response.dto';
 
 
 @Injectable()
@@ -254,11 +255,11 @@ export class UserService {
     return this.getUserInfoWithSkills(userId);
   }
 
-  async fetchManyAcceptedProjects(userId: number) {
+  async fetchManyAcceptedProjects(userId: number): Promise<ProjectResponseDto[]> {
     const applicants = await this.prisma.applicant.findMany({
       where: {
         userId,
-        status: 'ACCEPTED',
+        status: 'ACCEPTED', // 필터링
       },
       include: {
         Project: {
@@ -274,28 +275,41 @@ export class UserService {
       },
     });
   
-    // 필요한 정보만 가공
+    // 필요한 데이터만 가공하여 반환
     return applicants.map((applicant) => {
       const project = applicant.Project;
+  
       return {
         projectId: project.id,
         title: project.title,
         description: project.description,
-        startDate: project.startDate,
+        startDate: project.startDate.toISOString(),
         estimatedPeriod: project.estimatedPeriod,
         isBeginner: project.isBeginner,
-        status: applicant.status, // ACCEPTED 상태만 포함
-        skills: project.ProjectSkillTag.map((tag) => ({
-          id: tag.SkillTag.id,
-          name: tag.SkillTag.name,
-          img: tag.SkillTag.img,
+        methodId: project.methodId,
+        recruitmentStartDate: project.recruitmentStartDate.toISOString(),
+        recruitmentEndDate: project.recruitmentEndDate.toISOString(),
+        status: 'ACCEPTED', // 항상 ACCEPTED 상태 유지
+        ProjectSkillTag: project.ProjectSkillTag.map((tag) => ({
+          projectId: tag.projectId,
+          skillTagId: tag.skillTagId,
+          SkillTag: {
+            id: tag.SkillTag.id,
+            name: tag.SkillTag.name,
+            img: tag.SkillTag.img,
+          },
         })),
-        positions: project.ProjectPositionTag.map((tag) => ({
-          id: tag.PositionTag.id,
-          name: tag.PositionTag.name,
+        ProjectPositionTag: project.ProjectPositionTag.map((tag) => ({
+          projectId: tag.projectId,
+          positionTagId: tag.positionTagId,
+          PositionTag: {
+            id: tag.PositionTag.id,
+            name: tag.PositionTag.name,
+          },
         })),
       };
     });
   }
+
 
 }
