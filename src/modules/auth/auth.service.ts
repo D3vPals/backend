@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserService } from '../user/user.service'
+import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { SignUpDto } from './dto/signup.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -24,14 +24,15 @@ export class AuthService {
     const { email, password, nickname } = signUpDto;
 
     // 이메일 중복 체크
-    const isEmailAvailable = await this.userService.checkEmailAvailability(email);
+    const isEmailAvailable =
+      await this.userService.checkEmailAvailability(email);
     if (!isEmailAvailable) {
       throw new BadRequestException('이미 사용 중인 이메일입니다.');
     }
-  
+
     // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 10);
-  
+
     // 유저 생성
     const user = await this.prisma.user.create({
       data: {
@@ -40,7 +41,7 @@ export class AuthService {
         nickname,
       },
     });
-  
+
     // 성공 메시지 반환
     return {
       success: true,
@@ -54,24 +55,24 @@ export class AuthService {
   }
 
   // 비밀번호 재설정 로직
-  async resetPassword(resetPasswordDto:ResetPasswordDto) {
-    const {email, newPassword} = resetPasswordDto;
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const { email, newPassword } = resetPasswordDto;
 
     // 1. 이메일로 사용자 찾기 (userService에서 처리)
     const user = await this.userService.findUserByEmail(email); // userService를 사용하여 이메일로 사용자 찾기
     if (!user) {
       throw new BadRequestException('등록되지 않은 이메일입니다.');
     }
-  
-    // 2. 사용자 비밀번호 업데이트    
-    await this.userService.updatePasswordByEmail(email, newPassword);  
+
+    // 2. 사용자 비밀번호 업데이트
+    await this.userService.updatePasswordByEmail(email, newPassword);
     return {
       success: true,
       message: '비밀번호가 성공적으로 재설정되었습니다.',
     };
   }
 
-  // 로그인 
+  // 로그인
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
@@ -98,7 +99,7 @@ export class AuthService {
     // 3. 액세스 토큰 생성
     const accessToken = this.jwtService.sign(
       { sub: user.id, email: user.email },
-      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1h' },
+      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1m' },
     );
 
     // 4. 리프레시 토큰 생성 (해싱하지 않고 원본 그대로 저장)
@@ -165,7 +166,7 @@ export class AuthService {
       // 새로운 액세스 토큰 생성
       const newAccessToken = this.jwtService.sign(
         { sub: payload.sub, email: payload.email },
-        { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1h' },
+        { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '1m' },
       );
 
       // 새로운 리프레시 토큰 생성

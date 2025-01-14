@@ -15,7 +15,7 @@ import { UploadModule } from '../upload/upload.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET, // 환경 변수로 관리
-      signOptions: { expiresIn: '1h' }, // 기본 설정
+      signOptions: { expiresIn: '1m' }, // 기본 설정
     }),
     AuthenticodeModule,
     UploadModule,
