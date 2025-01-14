@@ -65,11 +65,14 @@ export class ProjectResponseDto {
   @ApiProperty({ description: '예상 기간', example: '3개월' })
   estimatedPeriod: string;
 
+  @ApiProperty({ description: '진행 방식 ID', example: 1 })
+  methodId: number;
+
   @ApiProperty({ description: '초보자 참여 가능 여부', example: true })
   isBeginner: boolean;
 
-  @ApiProperty({ description: '진행 방식 ID', example: 1 })
-  methodId: number;
+  @ApiProperty({ description: '프로젝트 마감 현황', example: true })
+  isDone: boolean;
 
   @ApiProperty({ description: '모집 시작 날짜', example: '2025-01-06T00:00:00.000Z' })
   recruitmentStartDate: string;
