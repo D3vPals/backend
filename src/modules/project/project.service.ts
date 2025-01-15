@@ -44,7 +44,7 @@ export class ProjectService {
     // 스킬 태그 조건 추가
     if (dto.skillTag && dto.skillTag.length > 0) {
       where.ProjectSkillTag = {
-        every: {
+        some: {
           skillTagId: { in: dto.skillTag },
         },
       };
@@ -68,6 +68,11 @@ export class ProjectService {
 
     // 새싹 가능 조건 추가
     if (dto.isBeginner !== undefined) {
+      if (dto.isBeginner !== true && dto.isBeginner !== null) {
+        throw new BadRequestException(
+          'isBeginner 값은 true 또는 null만 허용됩니다.',
+        );
+      }
       where.isBeginner = dto.isBeginner;
     }
 
