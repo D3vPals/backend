@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
@@ -14,6 +15,7 @@ export class GetManyProjectDTO {
     example: [1, 2],
     description: '스킬 태그',
     required: false,
+    type: [Number],
   })
   @IsArray()
   @IsOptional()
@@ -49,9 +51,10 @@ export class GetManyProjectDTO {
   })
   @IsBoolean()
   @IsOptional()
-  @Transform(({ value }) =>
-    value === 'true' ? true : value === 'false' ? false : value,
-  )
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === null || value === undefined || value === '') return null;
+  })
   isBeginner?: boolean;
 
   @ApiProperty({
