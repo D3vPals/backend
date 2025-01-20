@@ -120,23 +120,6 @@ export class ApplicantController {
           User: {
             id: 8,
             nickname: '김개발',
-            email: 'devpals@mail.com',
-            bio: null,
-            profileImg: '프로필 이미지 주소',
-            UserSkillTag: [
-              {
-                userId: 8,
-                skillTagId: 28,
-                createdAt: '2025-01-08T11:57:17.000Z',
-                SkillTag: {
-                  id: 28,
-                  name: 'Figma',
-                  img: '스킬 태그 이미지 주소',
-                  createdAt: '2025-01-02T15:11:15.000Z',
-                },
-              },
-              {},
-            ],
           },
         },
       ],
