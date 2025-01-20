@@ -220,4 +220,35 @@ export class ApplicantService {
       data: { status },
     });
   }
+
+  async fetchApplicant({
+    projectId,
+    authorId,
+    applicantId,
+  }: {
+    projectId: number;
+    authorId: number;
+    applicantId: number;
+  }) {
+    const project = await this.projectService.fetchProject({ id: projectId });
+    if (project.authorId !== authorId) {
+      throw new ForbiddenException('기획자만 조회 가능합니다.');
+    }
+
+    return await this.prisma.applicant.findFirst({
+      where: { projectId, userId: applicantId },
+      include: {
+        User: {
+          select: {
+            id: true,
+            nickname: true,
+            email: true,
+            bio: true,
+            profileImg: true,
+            UserSkillTag: { include: { SkillTag: true } },
+          },
+        },
+      },
+    });
+  }
 }
