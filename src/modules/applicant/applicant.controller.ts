@@ -167,7 +167,7 @@ export class ApplicantController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getApplicant(
+  async getManyApplicant(
     @CurrentUser() userId: number,
     @Param('id', ParseIntPipe) projectId: number,
   ) {
@@ -354,6 +354,94 @@ export class ApplicantController {
       projectId: id,
       userId: applicantUserId,
       status,
+    });
+  }
+
+  // GET: 지원자 상세 보기
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '공고 지원자 상세보기',
+    description: '관리자(본인)가 지원자 정보를 확인합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '공고 지원자 정보 가져오기 성공',
+    schema: {
+      example: {
+        id: 7,
+        userId: 8,
+        projectId: 6,
+        message: '하고싶은말',
+        email: '',
+        phoneNumber: '010-1111-1111',
+        career: [
+          {
+            name: 'string',
+            role: 'string',
+            periodEnd: 'string',
+            periodStart: 'string',
+          },
+        ],
+        status: 'REJECTED',
+        createdAt: '2025-01-08T17:54:43.000Z',
+        updatedAt: '2025-01-10T09:29:06.000Z',
+        User: {
+          id: 8,
+          nickname: '김개발데브',
+          email: 'devpals@mail.com',
+          bio: '새로운 소개글입니다.',
+          profileImg: '프로필이미지',
+          UserSkillTag: [
+            {
+              userId: 8,
+              skillTagId: 1,
+              createdAt: '2025-01-13T09:26:01.000Z',
+              SkillTag: {
+                id: 1,
+                name: 'JavaScript',
+                img: '스킬태그이미지',
+                createdAt: '2025-01-02T15:07:03.000Z',
+              },
+            },
+          ],
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 403,
+    description: '해당 공고 작성자(기획자)가 아닌 경우',
+    schema: {
+      example: {
+        message: '해당 공고의 기획자만 조회 가능합니다.',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '해당 공고가 없는 경우',
+    schema: {
+      example: {
+        message: '해당 공고는 존재하지 않습니다.',
+        error: 'Not Found',
+        statusCode: 404,
+      },
+    },
+  })
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Get(':applicantUserId')
+  async getApplicant(
+    @CurrentUser() userId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('applicantUserId', ParseIntPipe) applicantUserId: number,
+  ) {
+    return await this.applicantService.fetchApplicant({
+      authorId: userId,
+      projectId: id,
+      applicantUserId,
     });
   }
 }

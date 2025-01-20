@@ -129,10 +129,6 @@ export class ApplicantService {
           select: {
             id: true,
             nickname: true,
-            email: true,
-            bio: true,
-            profileImg: true,
-            UserSkillTag: { include: { SkillTag: true } },
           },
         },
       },
@@ -224,11 +220,11 @@ export class ApplicantService {
   async fetchApplicant({
     projectId,
     authorId,
-    applicantId,
+    applicantUserId,
   }: {
     projectId: number;
     authorId: number;
-    applicantId: number;
+    applicantUserId: number;
   }) {
     const project = await this.projectService.fetchProject({ id: projectId });
     if (project.authorId !== authorId) {
@@ -236,7 +232,7 @@ export class ApplicantService {
     }
 
     return await this.prisma.applicant.findFirst({
-      where: { projectId, userId: applicantId },
+      where: { projectId, userId: applicantUserId },
       include: {
         User: {
           select: {
