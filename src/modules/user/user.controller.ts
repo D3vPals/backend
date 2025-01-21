@@ -90,7 +90,7 @@ export class UserController {
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: '업로드할 프로필 이미지 파일 (최대 100MB, png, jpg, jpeg)',
+    description: '업로드할 프로필 이미지 파일 (최대 5MB, png, jpg, jpeg, svg)',
     schema: {
       type: 'object',
       properties: {
@@ -153,7 +153,7 @@ export class UserController {
     }
 
     const fileType = file.mimetype.split('/')[1]; // 파일 확장자 추출
-    const allowedFileTypes = ['jpeg', 'png', 'jpg'];
+    const allowedFileTypes = ['jpeg', 'png', 'jpg', 'svg'];
     if (!allowedFileTypes.includes(fileType)) {
       throw new BadRequestException('허용되지 않는 파일 형식입니다.');
     }
