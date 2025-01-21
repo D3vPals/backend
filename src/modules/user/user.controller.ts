@@ -137,6 +137,7 @@ export class UserController {
       },
     },
   })
+  @UseInterceptors(FileInterceptor('file'))
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   async patchUpdateProfileImage(
