@@ -137,11 +137,6 @@ export class UserController {
       },
     },
   })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB 제한
-    }),
-  )
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   async patchUpdateProfileImage(
