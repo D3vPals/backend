@@ -90,7 +90,7 @@ export class UserController {
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: '업로드할 프로필 이미지 파일 (최대 5MB)',
+    description: '업로드할 프로필 이미지 파일 (최대 100MB, png, jpg, jpeg)',
     schema: {
       type: 'object',
       properties: {
