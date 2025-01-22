@@ -80,6 +80,17 @@ export class ApplicantController {
       },
     },
   })
+  @ApiResponse({
+    status: 403,
+    description: '본인이 등록한 공고에 지원할 경우',
+    schema: {
+      example: {
+        message: '본인이 등록한 공고에 지원할 수 없습니다.',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+  })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Post()
