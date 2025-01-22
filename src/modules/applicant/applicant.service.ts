@@ -95,7 +95,11 @@ export class ApplicantService {
     userId: number;
     data: CreateApplicantDTO;
   }) {
-    await this.projectService.fetchProject({ id: projectId });
+    const project = await this.projectService.fetchProject({ id: projectId });
+    if (project.authorId === userId) {
+      throw new ForbiddenException('본인이 등록한 공고에 지원할 수 없습니다.');
+    }
+
     const { email, phoneNumber, career, message } = data;
 
     return await this.prisma.applicant.create({
