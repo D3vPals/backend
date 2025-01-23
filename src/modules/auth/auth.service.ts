@@ -76,6 +76,7 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
+
     // 1. 사용자 확인
     const user = await this.userService.findUserByEmail(email);
     if (!user) {
@@ -131,6 +132,10 @@ export class AuthService {
       data: {
         accessToken,
         refreshToken: rawRefreshToken, // 원본 리프레시 토큰을 반환
+      },
+      user: {
+        email: user.email,
+        nickname: user.nickname,
       },
     };
   }

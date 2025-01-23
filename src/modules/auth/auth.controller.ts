@@ -87,6 +87,10 @@ export class AuthController {
           accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
           refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         },
+        user: {
+          email: 'devpals@mail.com',
+          nickname: '김개발',
+        },
       },
     },
   })
