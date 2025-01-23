@@ -1,4 +1,4 @@
-import { 
+import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
@@ -14,10 +14,17 @@ import {
   Put,
   Param,
   UseGuards,
-  InternalServerErrorException 
- } from '@nestjs/common';
- import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { CurrentUser } from '../../decorators/curretUser.decorator';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
@@ -31,9 +38,7 @@ import { ProjectResponseDto } from './dto/project-response.dto';
 @ApiTags('user')
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('nickname-check')
   @HttpCode(HttpStatus.CREATED)
@@ -73,7 +78,8 @@ export class UserController {
     },
   })
   async postNicknameCheck(@Body() { nickname }: CheckNicknameDto) {
-    const isAvailable = await this.userService.checkNicknameAvailability(nickname);
+    const isAvailable =
+      await this.userService.checkNicknameAvailability(nickname);
 
     if (!isAvailable) {
       throw new BadRequestException('이미 사용 중인 닉네임입니다.');
@@ -86,7 +92,8 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '프로필 이미지 업데이트',
-    description: '사용자의 프로필 이미지를 파일 형식으로 업로드하고 업데이트합니다.',
+    description:
+      '사용자의 프로필 이미지를 파일 형식으로 업로드하고 업데이트합니다.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -172,7 +179,9 @@ export class UserController {
       };
     } catch (error) {
       console.error('Error while updating profile image:', error);
-      throw new InternalServerErrorException('프로필 이미지 업데이트 중 오류가 발생했습니다.');
+      throw new InternalServerErrorException(
+        '프로필 이미지 업데이트 중 오류가 발생했습니다.',
+      );
     }
   }
 
@@ -189,14 +198,16 @@ export class UserController {
     schema: {
       example: [
         {
-          projectTitle: "클론코딩 사이드 프로젝트 팀원 모집",
-          status: "ACCEPTED"
+          id: 1,
+          projectTitle: '클론코딩 사이드 프로젝트 팀원 모집',
+          status: 'ACCEPTED',
         },
         {
-          projectTitle: "클론코딩 모집",
-          status: "REJECTED"
-        }
-      ]
+          id: 2,
+          projectTitle: '클론코딩 모집',
+          status: 'REJECTED',
+        },
+      ],
     },
   })
   @ApiResponse({
@@ -212,13 +223,15 @@ export class UserController {
   })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  async getApplications(@CurrentUser() userId: number): Promise<ApplicationStatusDto[]> {
+  async getApplications(
+    @CurrentUser() userId: number,
+  ): Promise<ApplicationStatusDto[]> {
     if (!userId) {
       throw new BadRequestException('사용자 ID를 확인할 수 없습니다.');
     }
-  
+
     const applications = await this.userService.getApplicationsByUserId(userId);
-  
+
     return applications;
   }
 
@@ -227,7 +240,8 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '내 정보 보기',
-    description: '인증된 사용자의 정보를 반환하며, 포지션, 깃허브 링크, 경력, 스킬셋 등을 포함합니다.',
+    description:
+      '인증된 사용자의 정보를 반환하며, 포지션, 깃허브 링크, 경력, 스킬셋 등을 포함합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -271,7 +285,7 @@ export class UserController {
 
     // career가 비어 있는 경우 빈 배열 반환
     if (!userInfo.career || userInfo.career.length === 0) {
-    userInfo.career = [];
+      userInfo.career = [];
     }
 
     return userInfo;
@@ -376,12 +390,12 @@ export class UserController {
     return await this.userService.updateUser(userId, updateUserDto);
   }
 
-  
   @Get('me/project')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '참여 프로젝트 조회 (내 프로젝트)',
-    description: '현재 인증된 사용자가 참여한 프로젝트 목록을 반환합니다. "합격된" 프로젝트만 포함됩니다.',
+    description:
+      '현재 인증된 사용자가 참여한 프로젝트 목록을 반환합니다. "합격된" 프로젝트만 포함됩니다.',
   })
   @ApiResponse({
     status: 200,
@@ -456,8 +470,4 @@ export class UserController {
     const { userId } = params;
     return await this.userService.fetchManyAcceptedProjects(userId);
   }
-
-
 }
-
-
