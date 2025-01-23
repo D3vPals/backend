@@ -134,6 +134,7 @@ export class AuthService {
         refreshToken: rawRefreshToken, // 원본 리프레시 토큰을 반환
       },
       user: {
+        id: user.id,
         email: user.email,
         nickname: user.nickname,
       },

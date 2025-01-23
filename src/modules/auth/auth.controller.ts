@@ -88,6 +88,7 @@ export class AuthController {
           refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         },
         user: {
+          id: 8,
           email: 'devpals@mail.com',
           nickname: '김개발',
         },
