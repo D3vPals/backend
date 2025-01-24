@@ -5,18 +5,13 @@ on:
     branches:
       - prod
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
-        with:
-          ssh-key: ${{ secrets.EC2_KEY }}
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
