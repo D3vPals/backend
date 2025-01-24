@@ -103,7 +103,12 @@ export class UserService {
   ): Promise<ApplicationStatusDto[]> {
     try {
       const applications = await this.prisma.applicant.findMany({
-        where: { userId },
+        where: { 
+          userId,
+          Project: {
+            isDone: true, // 완료된 프로젝트만 조회
+          },
+         },
         include: {
           Project: {
             select: {
