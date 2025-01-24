@@ -69,7 +69,7 @@ export class AuthController {
     description: '서버 오류 - 닉네임 중복',
     schema: {
       example: {
-        statusCode: 500,
+        statusCode: 400,
         message: '이미 사용 중인 닉네임입니다.',
         error: 'Bad Request',
       },
