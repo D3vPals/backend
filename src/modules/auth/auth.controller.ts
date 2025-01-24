@@ -65,13 +65,13 @@ export class AuthController {
     },
   })
   @ApiResponse({
-    status: 500,
+    status: 400,
     description: '서버 오류 - 닉네임 중복',
     schema: {
       example: {
         statusCode: 500,
         message: '이미 사용 중인 닉네임입니다.',
-        error: 'Internal Server Error',
+        error: 'Bad Request',
       },
     },
   })
