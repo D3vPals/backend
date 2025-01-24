@@ -15,7 +15,7 @@ export class UserProjectsResponseDto {
         estimatedPeriod: '3개월',
         methodId: 1,
         isBeginner: true,
-        isDone: false,
+        isDone: true,
         recruitmentStartDate: '2025-01-01T00:00:00.000Z',
         recruitmentEndDate: '2025-02-01T00:00:00.000Z',
         status: 'ACCEPTED',

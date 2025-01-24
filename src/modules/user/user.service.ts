@@ -275,6 +275,9 @@ export class UserService {
       where: {
         userId,
         status: 'ACCEPTED', // 필터링
+        Project: {
+          isDone: true, // 완료된 프로젝트만 가져오기
+        },
       },
       include: {
         Project: {
@@ -329,11 +332,14 @@ export class UserService {
   }
 
   async fetchManyUserProjectsWithOwn(userId: number): Promise<UserProjectsResponseDto> {
-    // 참여한 프로젝트 (합격된 프로젝트만 조회)
+    // 참여한 프로젝트 (합격된 프로젝트만 + 완료된 프로젝트만)
     const acceptedProjects = await this.prisma.applicant.findMany({
       where: {
         userId,
         status: 'ACCEPTED',
+        Project: {
+          isDone: true, // 완료된 프로젝트만 가져오기
+        },
       },
       include: {
         Project: {
@@ -347,7 +353,10 @@ export class UserService {
   
     // 사용자가 기획한 프로젝트 조회
     const ownProjects = await this.prisma.project.findMany({
-      where: { authorId: userId },
+      where: { 
+        authorId: userId,
+        isDone: true,  // 완료된 프로젝트만
+      },
       include: {
         ProjectSkillTag: { include: { SkillTag: true } },
         ProjectPositionTag: { include: { PositionTag: true } },
