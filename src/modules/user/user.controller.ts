@@ -15,6 +15,7 @@ import {
   Param,
   UseGuards,
   InternalServerErrorException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -32,7 +33,6 @@ import { CheckNicknameDto } from './dto/check-nickname.dto';
 import { ApplicationStatusDto } from './dto/application-status.dto';
 import { MyInfoResponseDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { GetAcceptedProjectsDto } from './dto/get-accepted-projects.dto';
 import { ProjectResponseDto } from './dto/project-response.dto';
 import { UserProjectsResponseDto } from './dto/user-projects-response.dto';
 
@@ -468,9 +468,8 @@ export class UserController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   async getManyUserAcceptedProjects(
-    @Param() params: GetAcceptedProjectsDto
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<UserProjectsResponseDto> {
-    const { userId } = params;
-    return await this.userService.fetchManyUserProjectsWithOwn(userId);
+    return await this.userService.fetchManyUserProjectsWithOwn(id);
   }
 }

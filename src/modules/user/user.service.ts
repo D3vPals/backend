@@ -103,12 +103,12 @@ export class UserService {
   ): Promise<ApplicationStatusDto[]> {
     try {
       const applications = await this.prisma.applicant.findMany({
-        where: { 
+        where: {
           userId,
           Project: {
             isDone: true, // 완료된 프로젝트만 조회
           },
-         },
+        },
         include: {
           Project: {
             select: {
@@ -336,7 +336,9 @@ export class UserService {
     });
   }
 
-  async fetchManyUserProjectsWithOwn(userId: number): Promise<UserProjectsResponseDto> {
+  async fetchManyUserProjectsWithOwn(
+    userId: number,
+  ): Promise<UserProjectsResponseDto> {
     // 참여한 프로젝트 (합격된 프로젝트만 + 완료된 프로젝트만)
     const acceptedProjects = await this.prisma.applicant.findMany({
       where: {
@@ -355,7 +357,7 @@ export class UserService {
         },
       },
     });
-  
+
     // 사용자가 기획한 프로젝트 조회
     const ownProjects = await this.prisma.project.findMany({
       where: { authorId: userId },
@@ -365,7 +367,7 @@ export class UserService {
       },
       orderBy: { createdAt: 'desc' }, // 등록순 정렬
     });
-  
+
     return {
       acceptedProjects: acceptedProjects.map((applicant) => {
         const project = applicant.Project;
