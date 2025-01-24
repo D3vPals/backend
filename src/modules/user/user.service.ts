@@ -353,10 +353,7 @@ export class UserService {
   
     // 사용자가 기획한 프로젝트 조회
     const ownProjects = await this.prisma.project.findMany({
-      where: { 
-        authorId: userId,
-        isDone: true,  // 완료된 프로젝트만
-      },
+      where: { authorId: userId },
       include: {
         ProjectSkillTag: { include: { SkillTag: true } },
         ProjectPositionTag: { include: { PositionTag: true } },
