@@ -81,7 +81,7 @@ export class ProjectResponseDto {
   recruitmentEndDate: string;
 
   @ApiProperty({ description: '지원 상태', example: 'ACCEPTED' })
-  status: string;
+  status?: string;
 
   @ApiProperty({ description: '프로젝트 스킬 태그 목록', type: [ProjectSkillTagDto] })
   ProjectSkillTag: ProjectSkillTagDto[];
