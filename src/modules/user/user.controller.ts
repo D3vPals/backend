@@ -34,6 +34,7 @@ import { MyInfoResponseDto } from './dto/my-info-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GetAcceptedProjectsDto } from './dto/get-accepted-projects.dto';
 import { ProjectResponseDto } from './dto/project-response.dto';
+import { UserProjectsResponseDto } from './dto/user-projects-response.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -422,14 +423,14 @@ export class UserController {
   @Get(':id/project')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: '참여 프로젝트 조회 (특정 사용자)',
+    summary: '참여 및 기획 프로젝트 조회 (특정 사용자)',
     description:
-      '특정 사용자가 참여한 프로젝트 목록을 반환합니다. 경로 파라미터로 사용자 ID를 전달해야 하며, "합격된" 프로젝트만 포함됩니다.',
+      '특정 사용자가 참여한 프로젝트(합격)와 기획한 프로젝트를 반환합니다.',
   })
   @ApiResponse({
     status: 200,
-    description: '특정 사용자가 참여한 프로젝트 목록',
-    type: [ProjectResponseDto],
+    description: '특정 사용자가 참여한 및 기획한 프로젝트 목록',
+    type: UserProjectsResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -466,8 +467,10 @@ export class UserController {
   })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  async getManyUserAcceptedProjects(@Param() params: GetAcceptedProjectsDto) {
+  async getManyUserAcceptedProjects(
+    @Param() params: GetAcceptedProjectsDto
+  ): Promise<UserProjectsResponseDto> {
     const { userId } = params;
-    return await this.userService.fetchManyAcceptedProjects(userId);
+    return await this.userService.fetchManyUserProjectsWithOwn(userId);
   }
 }

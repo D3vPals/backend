@@ -30,6 +30,12 @@ export class AuthService {
       throw new BadRequestException('이미 사용 중인 이메일입니다.');
     }
 
+    // 닉네임 중복 체크
+    const isNicknameAvailable = await this.userService.checkNicknameAvailability(nickname);
+    if (!isNicknameAvailable) {
+      throw new BadRequestException('이미 사용 중인 닉네임입니다.');
+    }
+
     // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 10);
 
