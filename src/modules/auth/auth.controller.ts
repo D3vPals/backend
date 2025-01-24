@@ -64,6 +64,17 @@ export class AuthController {
       },
     },
   })
+  @ApiResponse({
+    status: 500,
+    description: '서버 오류 - 닉네임 중복',
+    schema: {
+      example: {
+        statusCode: 500,
+        message: '이미 사용 중인 닉네임입니다.',
+        error: 'Internal Server Error',
+      },
+    },
+  })
   async postSignUp(@Body() signUpDto: SignUpDto) {
     const result = await this.authService.signUp(signUpDto);
     return result; // authService.signUp()의 응답을 그대로 반환
