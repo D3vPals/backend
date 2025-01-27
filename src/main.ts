@@ -36,16 +36,13 @@ async function bootstrap() {
 
   app.useLogger(logger); // 앱에 커스터마이징된 로거 적용
 
+  // 환경 변수에서 CORS_ORIGINS 불러오기 및 처리
+  const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
+
   app.enableCors({
     origin: (origin, callback) => {
-      const allowedOrigins = [
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'http://devpals.s3-website.ap-northeast-2.amazonaws.com',
-      ];
-  
       if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);  // 요청한 출처를 그대로 허용
+        callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
       }
