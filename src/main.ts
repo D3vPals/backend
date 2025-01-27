@@ -37,13 +37,22 @@ async function bootstrap() {
   app.useLogger(logger); // 앱에 커스터마이징된 로거 적용
 
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://devpals.s3-website.ap-northeast-2.amazonaws.com' // 프론트 배포 URL 추가
-      ],
-    credentials: true, // 인증 정보(쿠키 등) 허용
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://devpals.s3-website.ap-northeast-2.amazonaws.com',
+      ];
+  
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);  // 요청한 출처를 그대로 허용
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
   });
+  
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(bodyParser.json());
 
