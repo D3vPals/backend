@@ -36,19 +36,19 @@ async function bootstrap() {
 
   app.useLogger(logger); // 앱에 커스터마이징된 로거 적용
 
-  // // 환경 변수에서 CORS_ORIGINS 불러오기 및 처리
-  // const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
+  // 환경 변수에서 CORS_ORIGINS 불러오기 및 처리
+  const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
 
-  // app.enableCors({
-  //   origin: (origin, callback) => {
-  //     if (!origin || allowedOrigins.includes(origin)) {
-  //       callback(null, true);
-  //     } else {
-  //       callback(new Error('Not allowed by CORS'));
-  //     }
-  //   },
-  //   credentials: true,
-  // });
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  });
   
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(bodyParser.json());
