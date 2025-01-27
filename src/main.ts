@@ -37,16 +37,10 @@ async function bootstrap() {
   app.useLogger(logger); // 앱에 커스터마이징된 로거 적용
 
   // 환경 변수에서 CORS_ORIGINS 불러오기 및 처리
-  const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
+  // const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
 
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: ['http://localhost:5173', 'http://devpals.s3-website.ap-northeast-2.amazonaws.com', 'http://ec2-15-165-173-141.ap-northeast-2.compute.amazonaws.com'],
     credentials: true,
   });
   
