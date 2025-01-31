@@ -91,6 +91,17 @@ export class ApplicantController {
       },
     },
   })
+  @ApiResponse({
+    status: 409,
+    description: '이미 지원한 공고에 지원할 경우',
+    schema: {
+      example: {
+        message: '이미 지원한 공고입니다.',
+        error: 'Conflict',
+        statusCode: 409,
+      },
+    },
+  })
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Post()
