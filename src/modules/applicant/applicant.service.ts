@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   Inject,
   forwardRef,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -98,6 +99,13 @@ export class ApplicantService {
     const project = await this.projectService.fetchProject({ id: projectId });
     if (project.authorId === userId) {
       throw new ForbiddenException('본인이 등록한 공고에 지원할 수 없습니다.');
+    }
+
+    const applicant = await this.prisma.applicant.findFirst({
+      where: { projectId, userId },
+    });
+    if (applicant) {
+      throw new ConflictException('이미 지원한 공고입니다.');
     }
 
     const { email, phoneNumber, career, message } = data;
