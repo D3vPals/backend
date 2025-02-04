@@ -252,7 +252,7 @@ backend/
 <summary><strong>✨ERD 이미지 보기✨</strong></summary>
 <div markdown="1">
 
-![ERD 이미지](https://github.com/user-attachments/assets/84700780-5339-4266-bd0e-c63715a222dc)
+![ERD 이미지](https://github.com/user-attachments/assets/9e0b556d-31b6-4f3f-a48c-cc13f7789b07)
 
 </div>
 </details>
@@ -309,9 +309,9 @@ backend/
 API 명세서(Notion Database로 작성)와 Swagger를 통해 API 목록을 확인할 수 있습니다.<br>
 아래 링크를 클릭하여 API 명세서와 Swagger 문서로 이동하세요.<br>
 
-**[📄 API 명세서 보러 가기](https://github.com/user-attachments/assets/e0c14d00-a6ef-4141-bfe6-38fdf9b22343)**
+**[📄 API 명세서 보러 가기](https://github.com/user-attachments/assets/02b2ced4-99e0-46d5-be3e-e091ba3fbdb4)**
 
-**[📄 Swagger 문서 보러 가기](https://github.com/user-attachments/assets/a7087b49-384b-4896-9176-de02bb619486)**
+**[📄 Swagger 문서 보러 가기](https://github.com/user-attachments/assets/f64288c8-64be-4de2-ae30-115a8ae15897)**
 
 
 ## 백엔드 자료
