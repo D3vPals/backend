@@ -14,7 +14,7 @@
    1-2. [프로젝트 실행하기](#프로젝트-실행하기)  
 2. [기술 스택](#기술-스택)  
 3. [폴더 구조](#폴더-구조)  
-4. [ERD](#erd)  
+4. [ERD](#erd)   
 5. [트러블슈팅](#트러블슈팅)  
 6. [기능 구현 목록](#기능-구현-목록)
 7. [API 명세서와 Swagger 문서](#api-명세서와-swagger-문서)
@@ -120,6 +120,17 @@ $ npm run start:prod
 
 ### CI/CD
 ![AWS EC2](https://img.shields.io/badge/AWS%20EC2-FF9900.svg?style=for-the-badge&logo=amazonec2&logoColor=white) ![PM2](https://img.shields.io/badge/pm2-2B037A.svg?style=for-the-badge&logo=pm2&logoColor=white) ![Nginx](https://img.shields.io/badge/nginx-009639.svg?style=for-the-badge&logo=nginx&logoColor=white) ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-2088FF.svg?style=for-the-badge&logo=githubactions&logoColor=white)
+
+<details>
+<summary><strong>✨CI/CD 구성도 보기✨</strong></summary>
+<div markdown="1">
+
+![CI/CD 구성도](https://github.com/user-attachments/assets/ac80afd5-f869-4afa-bff7-5cb6ab9cb05b)
+
+</div>
+</details>
+
+<br>
 
 <br>
 
