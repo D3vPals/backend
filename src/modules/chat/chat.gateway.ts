@@ -24,12 +24,18 @@ export class ChatGateway
     data를 emit 할 것을 주문하는 코드이다.*/
 
   @SubscribeMessage('test')
-handleTest(@ConnectedSocket() client: Socket, @MessageBody() data: { message: string }) {
+  handleTest(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { message: string },
+  ) {
     console.log(`📩 메시지 수신 from ${client.id}:`, data.message);
 
     // 보낸 사람을 포함해 모든 클라이언트에게 메시지 전송
-    this.server.emit("receiveMessage", { message: data.message, sender: client.id });
-}
+    this.server.emit('receiveMessage', {
+      message: data.message,
+      sender: client.id,
+    });
+  }
 
   afterInit(server: Server) {
     console.log('✅ WebSocket 서버 초기화 완료');
@@ -42,7 +48,7 @@ handleTest(@ConnectedSocket() client: Socket, @MessageBody() data: { message: st
     if (!onlineMap[socket.nsp.name]) {
       onlineMap[socket.nsp.name] = {};
     }
-    
+
     onlineMap[socket.nsp.name][socket.id] = socket.id;
 
     // 현재 접속한 모든 클라이언트에게 온라인 유저 목록 전송
@@ -53,7 +59,9 @@ handleTest(@ConnectedSocket() client: Socket, @MessageBody() data: { message: st
 
   //   연결 끊었을 때
   handleDisconnect(@ConnectedSocket() socket: Socket) {
-    console.log(`❌ [${socket.id}] 연결 해제 (네임스페이스: ${socket.nsp.name})`);
+    console.log(
+      `❌ [${socket.id}] 연결 해제 (네임스페이스: ${socket.nsp.name})`,
+    );
 
     if (onlineMap[socket.nsp.name]) {
       delete onlineMap[socket.nsp.name][socket.id];
