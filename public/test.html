@@ -1,44 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebSocket 테스트</title>
-  </head>
-  <body>
-    <h2>WebSocket 테스트</h2>
-    <p id="status">연결 상태: 연결 안 됨 ❌</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>익명 채팅</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
 
-    <input type="text" id="message" placeholder="메시지를 입력하세요" />
-    <button onclick="sendMessage()">메시지 보내기</button>
+        /* 배경 설정 (블러 효과 적용) */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: url('https://source.unsplash.com/1600x900/?city,night') no-repeat center center/cover;
+            backdrop-filter: blur(5px);
+        }
 
-    <ul id="messages"></ul>
+        /* 채팅 박스 전체 컨테이너 */
+        #chat-container {
+            width: 400px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.15); /* 반투명 */
+            border-radius: 15px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* 채팅창 헤더 */
+        #chat-header {
+            background: rgba(0, 123, 255, 0.85);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* 메시지 표시 영역 */
+        #chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+        }
+
+        /* 메시지 스타일 */
+        .message {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        /* 메시지 애니메이션 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 내가 보낸 메시지 */
+        .my-message {
+            align-self: flex-end;
+            background: rgba(0, 123, 255, 0.85);
+            color: white;
+            text-align: right;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 상대방이 보낸 메시지 */
+        .other-message {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.7);
+            color: black;
+            text-align: left;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 입력창 스타일 */
+        #chat-input {
+            display: flex;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+        }
+
+        /* 메시지 입력 필드 */
+        #messageInput {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 전송 버튼 스타일 */
+        #sendButton {
+            padding: 12px 15px;
+            margin-left: 10px;
+            background: rgba(0, 123, 255, 0.9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s ease-in-out;
+        }
+
+        #sendButton:hover {
+            background: rgba(0, 123, 255, 1);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-header">💬 익명 채팅</div>
+        <div id="chat-box"></div>
+        <div id="chat-input">
+            <input type="text" id="messageInput" placeholder="메시지를 입력하세요">
+            <button id="sendButton">전송</button>
+        </div>
+    </div>
 
     <script>
-      const socket = new WebSocket('ws://localhost:3000'); // 백엔드 WebSocket 주소
+        const socket = io("http://localhost:3000"); // 백엔드 Socket.io 서버
 
-      socket.onopen = function () {
-        console.log('✅ WebSocket 연결됨');
-        document.getElementById('status').innerText = '연결 상태: 연결됨 ✅';
-      };
+        socket.on("connect", () => {
+            console.log("✅ 서버와 연결됨");
+        });
 
-      socket.onmessage = function (event) {
-        console.log('📩 메시지 수신:', event.data);
-        const li = document.createElement('li');
-        li.innerText = event.data;
-        document.getElementById('messages').appendChild(li);
-      };
+        socket.on("receiveMessage", (data) => {
+            console.log("📩 메시지 수신:", data);
+            addMessage(data.message, data.sender);
+        });
 
-      socket.onclose = function () {
-        console.log('❌ WebSocket 연결 끊김');
-        document.getElementById('status').innerText = '연결 상태: 끊어짐 ❌';
-      };
+        socket.on("disconnect", () => {
+            console.log("❌ 연결 끊김");
+        });
 
-      function sendMessage() {
-        const message = document.getElementById('message').value;
-        socket.send(JSON.stringify({ event: 'test', data: message }));
-        console.log('📤 메시지 전송:', message);
-      }
+        document.getElementById("sendButton").addEventListener("click", sendMessage);
+        document.getElementById("messageInput").addEventListener("keypress", (event) => {
+            if (event.key === "Enter") sendMessage();
+        });
+
+        function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            socket.emit("test", { message });
+            messageInput.value = "";
+        }
+
+        function addMessage(message, senderId) {
+            const chatBox = document.getElementById("chat-box");
+            const messageDiv = document.createElement("div");
+
+            const isMine = senderId === socket.id;
+            messageDiv.className = isMine ? "message my-message" : "message other-message";
+            messageDiv.textContent = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
     </script>
-  </body>
+</body>
 </html>
