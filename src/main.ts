@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { Logger, LoggerService, ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -16,7 +17,6 @@ const logFilePath = path.join(logDir, logFile);
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true }); // 로그 디렉토리가 없으면 생성
 }
-
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -36,6 +36,9 @@ async function bootstrap() {
 
   app.useLogger(logger); // 앱에 커스터마이징된 로거 적용
 
+  // ✅ 정적 파일 제공 설정 (public 폴더)
+  app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+
   // 환경 변수에서 CORS_ORIGINS 불러오기 및 처리
   const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
 
@@ -49,7 +52,7 @@ async function bootstrap() {
     },
     credentials: true,
   });
-  
+
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(bodyParser.json());
 

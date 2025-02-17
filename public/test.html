@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebSocket 테스트</title>
+  </head>
+  <body>
+    <h2>WebSocket 테스트</h2>
+    <p id="status">연결 상태: 연결 안 됨 ❌</p>
+
+    <input type="text" id="message" placeholder="메시지를 입력하세요" />
+    <button onclick="sendMessage()">메시지 보내기</button>
+
+    <ul id="messages"></ul>
+
+    <script>
+      const socket = new WebSocket('ws://localhost:3000'); // 백엔드 WebSocket 주소
+
+      socket.onopen = function () {
+        console.log('✅ WebSocket 연결됨');
+        document.getElementById('status').innerText = '연결 상태: 연결됨 ✅';
+      };
+
+      socket.onmessage = function (event) {
+        console.log('📩 메시지 수신:', event.data);
+        const li = document.createElement('li');
+        li.innerText = event.data;
+        document.getElementById('messages').appendChild(li);
+      };
+
+      socket.onclose = function () {
+        console.log('❌ WebSocket 연결 끊김');
+        document.getElementById('status').innerText = '연결 상태: 끊어짐 ❌';
+      };
+
+      function sendMessage() {
+        const message = document.getElementById('message').value;
+        socket.send(JSON.stringify({ event: 'test', data: message }));
+        console.log('📤 메시지 전송:', message);
+      }
+    </script>
+  </body>
+</html>

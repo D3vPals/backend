@@ -14,6 +14,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { MethodModule } from './modules/method/method.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService, Logger],
