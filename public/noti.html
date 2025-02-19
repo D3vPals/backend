@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FCM 알림 테스트</title>
+  </head>
+  <body>
+    <h1>FCM 알림 테스트</h1>
+    <button id="requestPermission">알림 권한 요청</button>
+    <button id="sendTestNotification" disabled>테스트 알림 전송</button>
+    <p>📌 <strong>FCM 토큰:</strong> <span id="tokenDisplay">없음</span></p>
+    <h3>📩 수신된 알림</h3>
+    <ul id="notifications"></ul>
+
+    <!-- ✅ Firebase SDK 모듈 방식으로 가져오기 -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+      import {
+        getMessaging,
+        getToken,
+        onMessage,
+      } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js';
+
+      console.log('🚀 FCM 테스트 페이지 로드됨!');
+
+      // ✅ 환경 변수를 API에서 불러와 Firebase 설정 적용
+      async function loadConfig() {
+        try {
+          const response = await fetch('http://localhost:3000/config');
+          const config = await response.json();
+
+          // Firebase 설정 적용
+          const firebaseConfig = {
+            apiKey: config.FIREBASE_APIKEY,
+            authDomain: config.FIREBASE_DOMAIN,
+            projectId: config.FIREBASE_PROJECTID,
+            storageBucket: config.FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: config.FIREBASE_SENDER_ID,
+            appId: config.FIREBASE_APP_ID,
+          };
+
+          console.log('✅ Firebase 환경변수 로드 완료:', firebaseConfig);
+
+          // ✅ Firebase 초기화
+          const app = initializeApp(firebaseConfig);
+          const messaging = getMessaging(app);
+          console.log('🚀 Firebase 초기화 완료');
+
+          // ✅ 서비스 워커 등록
+          navigator.serviceWorker
+            .register('/firebase-messaging-sw.js')
+            .then((registration) => {
+              console.log('✅ 서비스 워커 등록 완료:', registration);
+            })
+            .catch((err) => {
+              console.error('❌ 서비스 워커 등록 실패:', err);
+            });
+
+          // ✅ FCM 알림 권한 요청
+          document
+            .getElementById('requestPermission')
+            .addEventListener('click', async () => {
+              try {
+                const permission = await Notification.requestPermission();
+                console.log('🔔 알림 권한 상태:', permission);
+
+                if (permission === 'granted') {
+                  console.log('✅ 알림 권한 허용됨!');
+
+                  const token = await getToken(messaging, {
+                    vapidKey:
+                      'BKypy-3QZwBaxIAMPihJyRsBXC_7rHq5NTd-8L09RHii6E338ticjGrm517qZl8KBYjcGTqaRuGMuzQVO9PLqc4',
+                  });
+
+                  if (token) {
+                    console.log('🚀 FCM 토큰:', token);
+                    document.getElementById('tokenDisplay').innerText = token;
+                    document.getElementById('sendTestNotification').disabled =
+                      false; // 알림 버튼 활성화
+                  } else {
+                    console.log('❌ FCM 토큰을 가져올 수 없음!');
+                    document.getElementById('tokenDisplay').innerText =
+                      'FCM 토큰 없음';
+                  }
+                } else {
+                  console.log('❌ 알림 권한 거부됨!');
+                }
+              } catch (error) {
+                console.error('⚠️ FCM 토큰 가져오기 오류:', error);
+              }
+            });
+
+          // ✅ FCM 알림 수신 (UI 업데이트 추가)
+          onMessage(messaging, (payload) => {
+            console.log('📩 알림 수신:', payload);
+            alert(
+              `🔔 ${payload.notification.title}\n${payload.notification.body}`,
+            );
+
+            // 📌 UI에 추가
+            const notificationList = document.getElementById('notifications');
+            const newNotification = document.createElement('li');
+            newNotification.innerText = `🔔 ${payload.notification.title}: ${payload.notification.body}`;
+            notificationList.appendChild(newNotification);
+          });
+
+          // ✅ 테스트 알림 전송
+          document
+            .getElementById('sendTestNotification')
+            .addEventListener('click', async () => {
+              const token = document.getElementById('tokenDisplay').innerText;
+              if (token === 'FCM 토큰 없음') {
+                alert(
+                  '❌ FCM 토큰이 없습니다. 알림 권한 요청 후 다시 시도해주세요.',
+                );
+                return;
+              }
+
+              console.log('🚀 테스트 알림 전송 요청...');
+              fetch('http://localhost:3000/noti/send-noti', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  fcmToken: token,
+                  message: '테스트 알림입니다!',
+                }),
+              })
+                .then((res) => res.json())
+                .then((data) => console.log('✅ 서버 응답:', data))
+                .catch((err) =>
+                  console.error('❌ 테스트 알림 전송 오류:', err),
+                );
+            });
+        } catch (error) {
+          console.error('❌ 환경 변수 로드 실패:', error);
+        }
+      }
+
+      // ✅ 실행
+      loadConfig();
+    </script>
+  </body>
+</html>

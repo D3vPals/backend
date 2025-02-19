@@ -15,6 +15,8 @@ import { MethodModule } from './modules/method/method.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ChatModule } from './modules/chat/chat.module';
+import { NotiModule } from './modules/noti/noti.module';
+import { ConfigsModule } from './modules/config/config.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { ChatModule } from './modules/chat/chat.module';
     }),
     ScheduleModule.forRoot(),
     ChatModule,
+    NotiModule,
+    ConfigsModule,
   ],
   controllers: [AppController],
   providers: [AppService, Logger],

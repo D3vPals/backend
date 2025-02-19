@@ -38,6 +38,12 @@ async function bootstrap() {
 
   // ✅ 정적 파일 제공 설정 (public 폴더)
   app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+  app.use(
+    '/firebase-messaging-sw.js',
+    express.static(
+      path.join(__dirname, '..', 'public', 'firebase-messaging-sw.js'),
+    ),
+  );
 
   // 환경 변수에서 CORS_ORIGINS 불러오기 및 처리
   const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
